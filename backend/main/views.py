@@ -1,10 +1,9 @@
 from django.http import HttpResponse
-from django.shortcuts import render
-from .repository.MainPoint import MainPoint
+from .repository.Repository import Repository
 
 # Create your views here.
 def get(request, model_name):
-    mp = MainPoint()
+    mp = Repository()
 
     if not hasattr(mp, model_name): return HttpResponse(f"Error: repository '{model_name}' not found")
 
@@ -17,7 +16,7 @@ def get(request, model_name):
 
 # Create your views here.
 def add(request, model_name):
-    mp = MainPoint()
+    mp = Repository()
     
     if not hasattr(mp, model_name): return HttpResponse(f"Error: repository '{model_name}' not found")
     
