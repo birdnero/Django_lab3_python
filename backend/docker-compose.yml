@@ -1,16 +1,16 @@
 services:
   db:
     image: postgres:15
-    container_name: db
+    container_name: ${DOCKER_BD_CONTAINER_NAME}
     restart: always
     environment:
-      - POSTGRES_DB=lab3_python
-      - POSTGRES_USER=broccoli
-      - POSTGRES_PASSWORD=vegetables
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     ports:
-      - "5433:5432"
+      - "${DB_PORT}:5432"
     volumes:
-      - db_lab:/var/lib/postgresql/data
+      - "${DOCKER_BD_PATH}:/var/lib/postgresql/data"
 
 volumes:
   db_lab:
