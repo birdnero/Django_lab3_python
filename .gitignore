@@ -6,3 +6,5 @@ db_lab/
 .vscode
 backend/myproject/__pycache__/*
 backend/myproject/__pycache__/settings.cpython-313.pyc
+sops_key.txt
+**/.env

@@ -1,0 +1,24 @@
+mkdir backend
+django-admin startproject myproject backend
+
+
+інструменти: 
+    sops: менеджер для шифрування, як pgp тільки простіше  
+     age: асиметричне шифрування
+встановлення (Windows): по ідеї відкривити PowerShell, як адміністратор та ввести 
+winget install --id FiloSottile.age
+також скачати soap звідси https://github.com/getsops/sops/releases/download/v3.11.0/sops-v3.11.0.amd64.exe
+
+
+одноразво
+age-keygen -o sops_key.txt
+
+раз на сеанс
+export SOPS_AGE_KEY_FILE=./sops_key.txt
+
+закодувати
+sops --config .sops.yml --input-type dotenv --output-type dotenv --encrypt backend/.env > backend/.env.enc
+
+розкодувати
+sops --config .sops.yml --input-type dotenv --output-type dotenv --decrypt backend/.env.enc > backend/.env
+

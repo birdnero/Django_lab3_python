@@ -1,2 +1,0 @@
-mkdir backend
-django-admin startproject myproject backend
