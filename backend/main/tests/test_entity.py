@@ -1,10 +1,10 @@
-from django.test import TestCase
+from django.test import SimpleTestCase
 from unittest.mock import patch, Mock
 import requests
 
 
 def get_entity_data(entity_id):
-    url = f"http://127.0.0.1/entity/api/actors/{entity_id}"
+    url = f"http://127.0.0.1/api/actors/{entity_id}"
 
     try:
         response = requests.get(url)
@@ -22,7 +22,8 @@ def get_entity_data(entity_id):
         return {"error": str(e)}
 
 
-class TestEntityData(TestCase):
+# не використовує тестову базу даних на відміну від TestCase    
+class TestEntityData(SimpleTestCase):
     
     @patch('requests.get')
     def test_get_entity_data(self, mock_get):
@@ -34,7 +35,7 @@ class TestEntityData(TestCase):
 
         entity_data = get_entity_data(1)
 
-        mock_get.assert_called_with("http://127.0.0.1/entity/api/actors/1")
+        mock_get.assert_called_with("http://127.0.0.1/api/actors/1")
         self.assertEqual(entity_data, response_dict)
 
     @patch('requests.get')
