@@ -1,6 +1,7 @@
 from .repository.Repository import Repository
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .serializers import *
 from drf_yasg.utils import swagger_auto_schema
@@ -9,7 +10,7 @@ from drf_yasg.utils import swagger_auto_schema
 class BaseViewSet(viewsets.ViewSet):
     repository = None
     serializer_class = None
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def list(self, _):
         objs = self.repository.get_all()
@@ -129,6 +130,11 @@ class ScheduleViewSet(BaseViewSet):
     @swagger_auto_schema(request_body=serializer_class)
     def update(self, request, pk=None):
         return super().update(request, pk)
+    
+    @action(detail=False, methods=['get'], url_path='stats')
+    def stats(self, _):
+        report = self.repository.get_stats()  
+        return Response(report)
 
 
 class TheatreViewSet(BaseViewSet):
