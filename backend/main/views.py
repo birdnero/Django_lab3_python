@@ -19,6 +19,8 @@ class BaseViewSet(viewsets.ViewSet):
 
     def retrieve(self, _, pk=None):
         obj = self.repository.get_by_id(pk)
+        if obj is None:
+            return Response(f"there is no object with id = {pk}", status=404)
         serializer = self.serializer_class(obj)
         return Response(serializer.data)
 

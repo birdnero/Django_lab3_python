@@ -13,7 +13,7 @@ const HomePage: React.FC = () => {
     <Typography.Title level={1}>
       Hello here 🥦
     </Typography.Title>
-    <Button href="plays/" variant="filled" shape="round" color="pink"  >
+    <Button href="plays/" variant="filled" shape="round" color="pink" size="large" >
       plays
     </Button>
   </div>

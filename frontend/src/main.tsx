@@ -8,6 +8,7 @@ import PlaysPage from "./pages/PlaysPage";
 import ErrorPage from "./pages/ErrorPage";
 import PlayPage from "./pages/PlayPage";
 import { ConfigProvider } from "antd";
+import { colors } from "./config";
 
 const router = createBrowserRouter([
   {
@@ -18,12 +19,10 @@ const router = createBrowserRouter([
   {
     path: "/plays",
     element: <PlaysPage />,
-    children: [
-      {
-        path: "/plays/:playid",
-        element: <PlayPage />,
-      },
-    ],
+  },
+  {
+    path: "/plays/:playid",
+    element: <PlayPage />,
   },
 ]);
 
@@ -32,13 +31,22 @@ ReactDom.createRoot(document.getElementById("root")!).render(
     <ConfigProvider
     theme={{
       token: {
-        colorLink: "pink",
-        colorText: "#695963"
+        colorLink: colors.accent,
+        colorText: colors["primary-txt"],
+        fontSize: 16,
+        fontWeightStrong: 400
       },
       components: {
         Skeleton: {
           paragraphLiHeight: 16,
-          // paragraphMarginTop: 0z  
+        },
+        Select: {
+            optionSelectedBg: colors.accent,
+            optionActiveBg: colors.accent + "37",
+            colorBgElevated: colors.secondary
+        }, 
+        Message: {
+          contentBg: colors.secondary
         }
       }
     }}>

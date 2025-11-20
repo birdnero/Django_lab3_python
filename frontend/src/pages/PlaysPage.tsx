@@ -2,9 +2,21 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import type { Play } from "../utils/DtoUtils";
 import { getQuery } from "../utils/RestUtils";
-import { Flex, Skeleton, Space, Typography } from "antd";
-import JsonContainer from "./components/JsonContainer";
+import { Button, Skeleton, Space, Typography } from "antd";
+import { colors } from "../config";
+import BackButton from "./components/BackButton";
 
+
+
+const PlayLink: React.FC<{
+  play: Play
+}> = ({ play }) => {
+
+
+  return (<Button href={"/plays/" + play.play_id.toString()} variant="filled" shape="round" color="pink" size="middle">
+    {play.name}
+  </Button>)
+}
 
 const PlaysPage: React.FC = () => {
   const [data, setData] = useState<Play[]>([])
@@ -12,41 +24,45 @@ const PlaysPage: React.FC = () => {
 
   useEffect(() => {
     getQuery("api/plays/").then(e => {
-      if (e) {
-        setData(e as Play[])
+      if (e !== null) {
+        setData((e as Play[]).sort((a, b) => a.play_id - b.play_id))
         setLoading(false)
       }
     })
   }, [])
 
-  return <div style={{
-    width: "100%",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center"
-  }}>
-    <Typography.Title level={2}>
+  return <div
+    style={{
+      width: "100%",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      position: "relative",
+    }}>
+    <BackButton />
+    <Typography.Title level={1}>
       All plays ever
     </Typography.Title>
-    <Flex>
-    </Flex>
-    {data.length > 0 || loading ? <JsonContainer>
-      <Space direction="vertical" style={{ minWidth: '700px', width: '100%' }} size={16}>
-        <Skeleton style={{
-          marginTop: 32,
-          marginLeft: 32
-        }} title={false} loading={loading} active paragraph={{
-          rows: 8,
-          width: [90, 80, 100, 180, 130, 240, 160, 90]
-        }} />
-        {data.map(play => (<pre style={{
-          display: "inline-block",
-          maxWidth: "100%",
-          whiteSpace: "pre-wrap",
-          wordBreak: "break-word"
-        }} key={play.play_id}>{JSON.stringify(play, null, 3)}</pre>))}
-      </Space>
-    </JsonContainer> : null
+
+    {data.length > 0 || loading ? <Space
+      direction="horizontal"
+      wrap
+      size="middle"
+      style={{
+        padding: 16,
+        backgroundColor: colors.secondary,
+        borderRadius: 32,
+        maxWidth: '720px',
+        marginBottom: 16
+      }}>
+      {loading ? <Space direction="horizontal">
+        <Skeleton.Button active shape="round" size="default" />
+        <Skeleton.Button active shape="round" size="default" />
+        <Skeleton.Button active shape="round" size="default" />
+      </Space> : null}
+      {/* CONTENT HERE */}
+      {data.map(play => <PlayLink play={play} />)}
+    </Space> : null
     }
 
   </div>
@@ -54,3 +70,11 @@ const PlaysPage: React.FC = () => {
 
 
 export default PlaysPage
+
+// (<pre
+//         style={{
+//           display: "inline-block",
+//           maxWidth: "100%",
+//           whiteSpace: "pre-wrap",
+//           wordBreak: "break-word"
+//         }} key={play.play_id}>{JSON.stringify(play, null, 3)}</pre>)
