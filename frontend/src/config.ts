@@ -3,3 +3,10 @@ export const Varialbles = {
     devMode: true,
     cookies: false
 }
+
+export const colors = {
+    primary: "#f1dfd2",
+    secondary: "#f1d2d2",
+    accent: "#eb2f96",
+    "primary-txt": "#594545",
+}

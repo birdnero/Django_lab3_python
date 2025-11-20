@@ -8,8 +8,8 @@ class ActorSerializer(serializers.ModelSerializer):
 
 
 class PlaySerializer(serializers.ModelSerializer):
-    actors = serializers.StringRelatedField(many=True)
-    directors = serializers.StringRelatedField(many=True)
+    actors = serializers.PrimaryKeyRelatedField(queryset=Actor.objects.all(), many=True)
+    directors = serializers.PrimaryKeyRelatedField(queryset=Director.objects.all(), many=True)
 
     class Meta:
         model = Play

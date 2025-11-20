@@ -1,6 +1,6 @@
 import { Varialbles } from "../config";
 
-const errorHandle = (e: any) => {
+const errorHandle = (e: string | object) => {
     if (Varialbles.devMode) {
         console.log(e)
     }
@@ -14,7 +14,7 @@ const queryMeta: RequestInit = {
     credentials: Varialbles.cookies ? "include" : undefined
 }
 
-export const response2obj = <T>(data: Response) => data.text().then(d => JSON.parse(d) as T)
+export const response2obj = <T>(data: Response) => data.ok? data.text().then(d => JSON.parse(d) as T).catch(errorHandle) : Promise.resolve(null)
 
 export const getQuery = <T extends object>(path: string, url: string = Varialbles.backend) => fetch(url + path, queryMeta)
     .then(response2obj<T>)
