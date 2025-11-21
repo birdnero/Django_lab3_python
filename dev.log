@@ -67,3 +67,7 @@ docker-compose --env-file ./backend/.env up
 
 git config user.email "neroforwork@gmail.com"
 git config user.name "birdnero"
+
+
+git config user.email "neroforwork@gmail.com"
+git config user.name "birdnero"
