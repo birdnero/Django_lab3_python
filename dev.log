@@ -64,3 +64,6 @@ docker-compose --env-file ./backend/.env up
 
 
 в нас в бд вказано обмеження на тривалысть вистави у 10 годин...
+
+git config user.email "neroforwork@gmail.com"
+git config user.name "birdnero"
