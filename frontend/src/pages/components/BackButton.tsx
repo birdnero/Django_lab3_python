@@ -1,8 +1,8 @@
 import { LeftCircleFilled } from "@ant-design/icons"
 import { colors } from "../../config"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, type To } from "react-router-dom"
 
-const BackButton: React.FC = () => {
+const BackButton: React.FC<{href?: To}> = ({href = -1 as To}) => {
     const navigate = useNavigate()
 
     return <div className="animated-icon"
@@ -14,7 +14,7 @@ const BackButton: React.FC = () => {
             fontSize: "40px",
             color: colors["floating-btn"],
         }}
-        onClick={() => (navigate(-1))} >
+        onClick={() => (navigate(href))} >
         <LeftCircleFilled className="animated-icon-self" style={{ transition: "100ms" }} />
     </div>
 }

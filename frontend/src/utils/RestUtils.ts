@@ -9,14 +9,22 @@ const errorHandle = (e: string | object) => {
 
 const queryMeta: RequestInit = {
     headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        // "Authorization": `Bearer ${getAccessToken()}`,
     },
     credentials: Varialbles.cookies ? "include" : undefined
 }
 
-export const response2obj = <T>(data: Response) => data.ok ? data.text().then(d => JSON.parse(d) as T).catch(errorHandle) : Promise.resolve(null)
+const handleAuth = (data: Response) => {
+    if(data.status == 401){
+        // location.assign("/login")
+    }
+    return Promise.resolve((null))
+}
 
-export const getQuery = <T extends object>(path: string, url: string = Varialbles.backend ) => fetch(url + path, {
+export const response2obj = <T>(data: Response) => data.ok ? data.text().then(d => JSON.parse(d) as T).catch(errorHandle) : handleAuth(data)
+
+export const getQuery = <T extends object>(path: string, url: string = Varialbles.backend) => fetch(url + path, {
     ...queryMeta
 })
     .then(response2obj<T>)

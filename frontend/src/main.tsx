@@ -10,6 +10,7 @@ import PlayPage from "./pages/PlayPage";
 import { ConfigProvider } from "antd";
 import { colors } from "./config";
 import PlayCreatePage from './pages/PlayCreatePage';
+import LoginPage from "./pages/LoginPage";
 
 const router = createBrowserRouter([
   {
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
   {
     path: "/plays/:playid",
     element: <PlayPage />,
+  },
+  {
+    path: "/login",
+    element: <LoginPage />,
   }
 ]);
 
