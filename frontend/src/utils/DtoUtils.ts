@@ -20,13 +20,13 @@ export interface Director {
 
 export interface Play {
   play_id: number;
-  actors: number[] | Actor[];
-  directors: number[] | Director[];
+  actor_ids: number[];
+  director_ids: number[];
   name: string;
   duration: number;
   description: string;
   author: string;
-  genre: number | Genre;
+  genre_id: number;
 }
 
 export interface UserLogin {
