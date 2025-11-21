@@ -66,9 +66,12 @@ const PlayCreatePage: React.FC = () => {
 
     const createPlay = () => {
         if (data) {
-            const Data: Play = {
+            const Data = {
                 ...data,
-                genre: typeof data.genre === "number" ? data.genre : data.genre.genre_id
+                genre_id: typeof data.genre === "number" ? data.genre : data.genre.genre_id,
+                actor_ids: data.actors,
+                director_ids: data.directors,
+
             }
             if (checkData()) {
                 postQuery(`api/plays/`, Data).then(r => r ? (setData(EmptyPlay), messageApi.success("succesfully saved!", 0.5)) : messageApi.error("error ocurred", 0.5))

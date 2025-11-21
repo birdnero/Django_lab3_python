@@ -16,7 +16,7 @@ const HomePage: React.FC = () => {
     <Button href="plays/" variant="filled" shape="round" color="pink" size="large" >
       plays
     </Button>
-    <Button href="plays/" variant="filled" shape="round" color="pink" size="large" >
+    <Button href="/login/" variant="filled" shape="round" color="pink" size="large" >
       login
     </Button>
   </Space>

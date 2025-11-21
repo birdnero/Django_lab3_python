@@ -9,7 +9,7 @@ function ErrorPage() {
 
 
   return <Space direction="vertical" wrap style={{ width: "100dvw", height: "100dvh", justifyContent: "center", alignContent: "center", alignItems: "center", columnGap: 0 }}>
-    <BackButton />
+    <BackButton href={"/"}  />
     {!isOpened && <>
       <Typography.Title level={1}>It is an error page</Typography.Title>
       <Typography.Title level={1}>You'll regret coming here😈</Typography.Title>

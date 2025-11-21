@@ -4,21 +4,36 @@ import type { TextAreaProps } from "antd/es/input"
 import Input from "antd/es/input"
 
 
-const h1Style: React.CSSProperties = {
-    fontSize: 42,
-    marginBlockStart: "0.67em",
-    marginBlockEnd: " 0.67em",
-    marginBottom: "0.5em",
-    color: colors["primary-txt"],
-    fontWeight: 400,
-    lineHeight: 1.1904761904761905,
-    padding: 0
+const EditableStyles: {
+    "regular": React.CSSProperties,
+    "h1": React.CSSProperties,
+    "fixed": React.CSSProperties,
+    "default": React.CSSProperties,
+} = {
+    default: {
+        padding: 0,
+    },
+    "h1": {
+        fontSize: 42,
+        marginBlockStart: "0.67em",
+        marginBlockEnd: " 0.67em",
+        marginBottom: "0.5em",
+        color: colors["primary-txt"],
+        fontWeight: 400,
+        lineHeight: 1.1904761904761905,
+    },
+    fixed: {
+        width: 120,
+    },
+    regular: {
+
+    }
 }
 
 
 
 export interface EditableFieldProps {
-    size?: "regular" | 1,
+    size?: "regular" | "h1" | "fixed",
     textarea: TextAreaProps
 }
 
@@ -35,8 +50,9 @@ const EditableField: React.FC<EditableFieldProps> = ({
         autoSize={autoSize}
         variant={variant} {...textarea}
         style={{
+            ...EditableStyles.default,
+            ...EditableStyles[size],
             ...textarea.style,
-            ...(size === 1 ? h1Style : {})
         }} />
 }
 
