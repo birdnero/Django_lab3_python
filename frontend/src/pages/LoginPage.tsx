@@ -1,12 +1,13 @@
 import type React from "react";
 import { useState } from "react";
 import { postQuery } from "../utils/RestUtils";
-import { type UserLogin } from '../utils/DtoUtils';
+import { type UserLogin } from '../utils/ApiDtos';
 import { Button, Input, message, Space, Typography } from "antd";
 import BackButton from "./components/BackButton";
 import CardContainer from "./components/Containers";
-import { changeField, checkAllFilled } from "../utils/HookFoldUtils";
+import { changeField, checkAllFilled } from "../utils/HookFolders";
 import { useNavigate } from "react-router-dom";
+import { useToken } from "../utils/Statemanager";
 
 
 const EmptyUserLogin: UserLogin = {
@@ -14,22 +15,12 @@ const EmptyUserLogin: UserLogin = {
     password: ""
 }
 
-export const setAccessToken = (token: string) => {
-    localStorage.setItem("access_token", token);
-}
-
-
-export const getAccessToken = () => {
-    const token = localStorage.getItem("access_token");
-
-    return token;
-}
-
-
 
 const LoginPage: React.FC = () => {
     const [data, setData] = useState<UserLogin>(EmptyUserLogin)
     const [messageApi, contextHolder] = message.useMessage();
+    //TODO fix it
+    const setToken = useToken(s => s.setToken)
 
     const navigate = useNavigate()
 
@@ -38,7 +29,7 @@ const LoginPage: React.FC = () => {
         if (checkAllFilled(data, EmptyUserLogin)) {
             postQuery(`login/`, data).then(r => {
                 const success = (r: { access: string }) => {
-                    setAccessToken(r.access)
+                    setToken(r.access)
                     messageApi.success("succesfully saved!", 1).then(() => navigate("/"))
                 }
 

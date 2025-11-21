@@ -2,15 +2,15 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { deleteQuery, getQuery, putQuery } from "../utils/RestUtils";
-import { type Genre, type Play } from '../utils/DtoUtils';
+import { type Genre, type Play } from '../utils/ApiDtos';
 import { Button, message, Select, Space, Typography } from "antd";
 import BackButton from "./components/BackButton";
 import { colors } from "../config";
 import { ClockCircleOutlined, DeleteFilled } from "@ant-design/icons";
-import { changeField } from "../utils/HookFoldUtils";
+import { changeField } from "../utils/HookFolders";
 import EditableField from "./components/EditableField";
-import type { MessageInstance } from "antd/es/message/interface";
 import CardContainer from "./components/Containers";
+import { useMessage } from "../utils/Statemanager";
 
 function formatMinutes(minutes: number) {
   const hours = Math.floor(minutes / 60);
@@ -26,24 +26,28 @@ function parseTimeString(str: string) {
 
   if (!match) return null;
 
-  let hours = parseInt(match[1].slice(0, 2), 10);
+  let hours = parseInt(match[1].slice(0, 1), 10);
   let minutes = parseInt(match[2].slice(0, 2), 10);
-  if (minutes > 59) {
-    minutes = 59
-  }
+
   if (Number.isNaN(minutes)) {
     minutes = 0
   }
   if (Number.isNaN(hours)) {
     hours = 0
   }
-
+  if (minutes > 59) {
+    minutes = 59
+  }
+  if (hours > 59) {
+    hours = 59
+  }
   return [hours, minutes];
 }
 
 
-const DeletePlayButton: React.FC<{ id: number, messageApi: MessageInstance }> = ({ id, messageApi }) => {
+const DeletePlayButton: React.FC<{ id: number }> = ({ id }) => {
   const navigate = useNavigate()
+  const messageApi = useMessage(s => s.messageApi)
 
   return <div className="animated-icon"
     style={{
@@ -54,7 +58,7 @@ const DeletePlayButton: React.FC<{ id: number, messageApi: MessageInstance }> = 
       fontSize: "24px",
       color: colors["accent"] + "66",
     }}
-    onClick={() => deleteQuery(`api/plays/${id}/`).then(r => { r ? (messageApi.success("deleted!", 1).then(() => navigate(-1))) : messageApi.error("error ocurred", 0.5) })}>
+    onClick={() => deleteQuery(`api/plays/${id}/`).then(r => { r ? (messageApi?.success("deleted!", 1).then(() => navigate(-1))) : messageApi?.error("error ocurred", 0.5) })}>
     <DeleteFilled className="animated-icon-self" style={{ transition: "100ms" }} />
   </div>
 }
@@ -63,7 +67,7 @@ const DeletePlayButton: React.FC<{ id: number, messageApi: MessageInstance }> = 
 const PlayPage: React.FC = () => {
   const params = useParams<{ playid: string }>();
   const [data, setData] = useState<Play | null>(null)
-  const [messageApi, contextHolder] = message.useMessage();
+  const messageApi = useMessage(s => s.messageApi)
   const [genres, setGenres] = useState<Genre[] | null>(null)
   const [isChanged, setChanged] = useState<boolean>(false)
 
@@ -95,12 +99,11 @@ const PlayPage: React.FC = () => {
         actor_ids: [],
         director_ids: [],
       }
-      putQuery(`api/plays/${Data.play_id}/`, Data).then(r => r ? (setChanged(false), messageApi.success("succesfully saved!", 0.5)) : messageApi.error("error ocurred", 0.5))
+      putQuery(`api/plays/${Data.play_id}/`, Data).then(r => r ? (setChanged(false), messageApi?.success("succesfully saved!", 0.5)) : messageApi?.error("error ocurred", 0.5))
     }
   }
 
   return <>
-    {contextHolder}
     <BackButton />
     <CardContainer outerSize="fullsize" innerSpace={{
       style: {
@@ -109,7 +112,7 @@ const PlayPage: React.FC = () => {
     }}>
 
       {data ? <>
-        <DeletePlayButton id={data.play_id} messageApi={messageApi} />
+        <DeletePlayButton id={data.play_id} />
         <EditableField size="h1" textarea={{
           value: data.name,
           onChange: v => (changeField(v.currentTarget.value, "name", setData), setChanged(true))

@@ -1,6 +1,6 @@
 import type React from "react";
 import { useEffect, useState } from "react";
-import type { Play } from "../utils/DtoUtils";
+import type { Play } from "../utils/ApiDtos";
 import { getQuery } from "../utils/RestUtils";
 import { Skeleton, Space, Typography } from "antd";
 import { colors } from "../config";

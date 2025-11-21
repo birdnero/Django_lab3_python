@@ -1,7 +1,11 @@
 import { Button, Space, Typography } from "antd";
 import type React from "react";
+import { useMessage, useToken } from "../utils/Statemanager";
 
 const HomePage: React.FC = () => {
+  const messageApi = useMessage(s => s.messageApi)
+  const setToken = useToken(s => s.setToken)
+  const token = useToken(s => s.token)
 
 
   return <Space direction="vertical" style={{
@@ -16,9 +20,15 @@ const HomePage: React.FC = () => {
     <Button href="plays/" variant="filled" shape="round" color="pink" size="large" >
       plays
     </Button>
-    <Button href="/login/" variant="filled" shape="round" color="pink" size="large" >
+    {token == "" ? <Button href="/login/" variant="filled" shape="round" color="pink" size="large" >
       login
-    </Button>
+    </Button> :
+      <Button onClick={() => {
+        setToken("")
+        messageApi?.success("you are free!")
+      }} variant="filled" shape="round" color="red" size="middle" >
+        logout
+      </Button>}
   </Space>
 }
 
