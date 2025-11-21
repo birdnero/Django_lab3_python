@@ -89,9 +89,11 @@ const PlayPage: React.FC = () => {
 
   const saveFields = () => {
     if (data) {
-      const Data: Play = {
+      const Data = {
         ...data,
-        genre: typeof data.genre === "number" ? data.genre : data.genre.genre_id
+        genre_id: typeof data.genre === "number" ? data.genre : data.genre.genre_id,
+        actor_ids: [],
+        director_ids: [],
       }
       putQuery(`api/plays/${Data.play_id}/`, Data).then(r => r ? (setChanged(false), messageApi.success("succesfully saved!", 0.5)) : messageApi.error("error ocurred", 0.5))
     }
