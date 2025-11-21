@@ -11,7 +11,7 @@ import { ConfigProvider, message, type ThemeConfig } from "antd";
 import { colors } from "./config";
 import PlayCreatePage from './pages/PlayCreatePage';
 import LoginPage from "./pages/LoginPage";
-import { useMessage } from "./utils/Statemanager";
+import { useMessage } from "./utils/StateManager";
 
 const router = createBrowserRouter([
   {
@@ -55,6 +55,13 @@ const AntdTheme: ThemeConfig = {
     },
     Message: {
       contentBg: colors.secondary
+    },
+    Input: {
+      colorBgBase: colors.accent,
+      colorBorder: colors.accent,
+      activeBorderColor: colors.accent,
+      hoverBorderColor: colors.accent,
+      
     }
   }
 }

@@ -7,7 +7,7 @@ import BackButton from "./components/BackButton";
 import CardContainer from "./components/Containers";
 import { changeField, checkAllFilled } from "../utils/HookFolders";
 import { useNavigate } from "react-router-dom";
-import { useToken } from "../utils/Statemanager";
+import { useToken } from "../utils/StateManager";
 
 
 const EmptyUserLogin: UserLogin = {
@@ -55,7 +55,7 @@ const LoginPage: React.FC = () => {
                             autoComplete="email"
                             placeholder="Пошта"
                             value={data.email}
-                            onChange={v => changeField(v.currentTarget.value, "email", setData)}
+                            onInput={v => changeField(v.currentTarget.value, "email", setData)}
                             variant="borderless"
                             style={{
                                 padding: 0,
@@ -68,7 +68,7 @@ const LoginPage: React.FC = () => {
                             placeholder="Пароль"
                             type="password"
                             value={data.password}
-                            onChange={v => changeField(v.currentTarget.value, "password", setData)}
+                            onInput={v => changeField(v.currentTarget.value, "password", setData)}
                             variant="borderless"
                             style={{
                                 padding: 0,

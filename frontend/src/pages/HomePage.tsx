@@ -1,6 +1,6 @@
 import { Button, Space, Typography } from "antd";
 import type React from "react";
-import { useMessage, useToken } from "../utils/Statemanager";
+import { useMessage, useToken } from "../utils/StateManager";
 
 const HomePage: React.FC = () => {
   const messageApi = useMessage(s => s.messageApi)

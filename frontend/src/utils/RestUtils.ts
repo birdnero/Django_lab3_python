@@ -1,5 +1,5 @@
 import { Varialbles } from "../config";
-import { useToken } from "./Statemanager";
+import { useToken } from "./StateManager";
 
 
 const errorHandle = (e: string | object) => {
@@ -22,7 +22,7 @@ const handleAuth = (data: Response) => {
         if (r.error && r.error[0] == "WrongData") {
             return null
         } else {
-            // location.assign("/login")
+            location.assign("/login")
         }
     }
 
