@@ -1,3 +1,4 @@
+import { str2duration } from "./DurationUtils"
 
 export const changeField = <T, V>(value: T, field: string, setter: React.Dispatch<React.SetStateAction<V>>) => setter(d => {
     if (d) {
@@ -16,3 +17,22 @@ export const checkAllFilled = <T extends object>(V: T, emptyV: T) => {
     });
 }
 
+export const changeTime = <T,>(
+  v: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+  setter: React.Dispatch<React.SetStateAction<T>>,
+  onChanged?: () => any
+) => {
+  const inputEl = v.currentTarget
+  const curpos = inputEl.selectionStart || 0
+  const time = str2duration(v.currentTarget.value)
+
+  if (time) {
+    changeField(time, "duration", setter)
+    if (onChanged)
+      onChanged()
+  }
+
+  setTimeout(() => {
+    inputEl.setSelectionRange(curpos, curpos)
+  }, 0)
+}

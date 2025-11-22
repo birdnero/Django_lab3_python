@@ -21,10 +21,9 @@ const LoginPage: React.FC = () => {
     const [data, setData] = useState<UserLogin>(EmptyUserLogin)
     const [loading, setloading] = useState<boolean>(false)
     const [messageApi, contextHolder] = message.useMessage();
-    //TODO fix it
     const setToken = useToken(s => s.setToken)
-
     const navigate = useNavigate()
+    
 
     const loginMe = (e: React.FormEvent<HTMLFormElement>) => {
         setloading(true)

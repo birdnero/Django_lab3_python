@@ -30,11 +30,10 @@ const PlaysPage: React.FC = () => {
       <FloatingButton Icon={LeftCircleFilled} onClick={() => navigate(-1)} inContainer />
       <FloatingButton Icon={PlusCircleFilled} onClick={() => navigate("create")} inContainer />
     </FloatingContainer>
-    <Container template="outer" containerSize="fullsize" props={{style: {justifyContent: "start"}}} >
+    <Container template="outer" containerSize="fullsize" props={{ style: { justifyContent: "start" } }} >
       <Typography.Title level={1}>
         All plays ever
       </Typography.Title>
-
       <Container template="inner" containerSize="compact" props={{
         direction: "horizontal",
         wrap: true,

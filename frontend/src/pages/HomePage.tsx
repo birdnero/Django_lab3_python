@@ -1,6 +1,7 @@
-import { Button, Space, Typography } from "antd";
+import { Button, Typography } from "antd";
 import type React from "react";
 import { useMessage, useToken } from "../utils/StateManager";
+import { Container } from "../components/Containers";
 
 const HomePage: React.FC = () => {
   const messageApi = useMessage(s => s.messageApi)
@@ -8,13 +9,7 @@ const HomePage: React.FC = () => {
   const token = useToken(s => s.token)
 
 
-  return <Space direction="vertical" style={{
-    width: "100%",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    columnGap: 0
-  }}>
+  return <Container template="outer" containerSize="fullsize" props={{ size: "small", style: {justifyContent: undefined}}}>
     <Typography.Title level={1}>
       Hello here 🥦
     </Typography.Title>
@@ -27,10 +22,10 @@ const HomePage: React.FC = () => {
       <Button onClick={() => {
         setToken("")
         messageApi?.success("you are free!")
-      }} variant="filled" shape="round" color="red" size="middle" >
+      }} variant="link" shape="round" color="red" size="middle" >
         logout
       </Button>}
-  </Space>
+  </Container>
 }
 
 export default HomePage 
