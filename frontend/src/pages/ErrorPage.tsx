@@ -1,5 +1,5 @@
 import { Button, Space, Typography } from "antd";
-import BackButton from "./components/BackButton";
+import BackButton from "../components/FloatingButton";
 import { useState } from "react";
 import error_img from "../../assets/zahar.jpg"
 import { colors } from "../config";

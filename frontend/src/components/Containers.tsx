@@ -1,7 +1,7 @@
 import type React from "react"
 import type { PropsWithChildren } from "react"
 import { Space, type SpaceProps } from "antd"
-import { colors } from "../../config"
+import { colors } from "../config"
 
 
 const CardStyles: {

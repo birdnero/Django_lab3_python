@@ -4,9 +4,9 @@ import type { Play } from "../utils/ApiDtos";
 import { getQuery } from "../utils/RestUtils";
 import { Skeleton, Space, Typography } from "antd";
 import { colors } from "../config";
-import BackButton from "./components/BackButton";
-import PlayLink from "./components/PlayLink";
-import CreateButton from "./components/CreateButton";
+import FloatingButton from "../components/FloatingButton";
+import PlayLink from "../components/PlayLink";
+import CreateButton from "../components/CreateButton";
 
 const PlaysPage: React.FC = () => {
   const [data, setData] = useState<Play[]>([])
@@ -29,7 +29,7 @@ const PlaysPage: React.FC = () => {
       alignItems: "center",
       position: "relative",
     }}>
-    <BackButton />
+    <FloatingButton />
     <CreateButton />
     <Typography.Title level={1}>
       All plays ever

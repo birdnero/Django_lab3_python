@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { getQuery, postQuery } from "../utils/RestUtils";
 import { type Genre, type Play } from '../utils/ApiDtos';
 import { Button, Input, message, Select, Space, Typography } from "antd";
-import BackButton from "./components/BackButton";
+import BackButton from "../components/FloatingButton";
 import { colors } from "../config";
 import { ClockCircleOutlined } from "@ant-design/icons";
 import { changeField } from "../utils/HookFolders";

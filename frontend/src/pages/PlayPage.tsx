@@ -3,13 +3,13 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { deleteQuery, getQuery, putQuery } from "../utils/RestUtils";
 import { type Genre, type Play } from '../utils/ApiDtos';
-import { Button, message, Select, Space, Typography } from "antd";
-import BackButton from "./components/BackButton";
+import { Button, Select, Space, Typography } from "antd";
+import BackButton from "../components/FloatingButton";
 import { colors } from "../config";
 import { ClockCircleOutlined, DeleteFilled } from "@ant-design/icons";
 import { changeField } from "../utils/HookFolders";
-import EditableField from "./components/EditableField";
-import CardContainer from "./components/Containers";
+import EditableField from "../components/EditableField";
+import CardContainer from "../components/Containers";
 import { useMessage } from "../utils/StateManager";
 
 function formatMinutes(minutes: number) {
