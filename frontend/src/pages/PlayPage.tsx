@@ -4,9 +4,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import { deleteQuery, getQuery, putQuery } from "../utils/RestUtils";
 import { type Genre, type Play } from '../utils/ApiDtos';
 import { Button, Select, Space, Typography } from "antd";
-import BackButton from "../components/FloatingButton";
+import { FloatingButton } from "../components/FloatingButton";
 import { colors } from "../config";
-import { ClockCircleOutlined, DeleteFilled } from "@ant-design/icons";
+import { ClockCircleOutlined, DeleteFilled, LeftCircleFilled } from "@ant-design/icons";
 import { changeField } from "../utils/HookFolders";
 import EditableField from "../components/EditableField";
 import CardContainer from "../components/Containers";
@@ -58,7 +58,7 @@ const DeletePlayButton: React.FC<{ id: number }> = ({ id }) => {
       fontSize: "24px",
       color: colors["accent"] + "66",
     }}
-    onClick={() => deleteQuery(`api/plays/${id}/`).then(r => { r ? (messageApi?.success("deleted!", 1).then(() => navigate(-1))) : messageApi?.error("error ocurred", 0.5) })}>
+    onClick={() => deleteQuery(`api/plays/${id}/`).then(r => r ? (messageApi?.success("deleted!", 1).then(() => navigate(-1)), null) : messageApi?.error("error ocurred", 0.5))}>
     <DeleteFilled className="animated-icon-self" style={{ transition: "100ms" }} />
   </div>
 }
@@ -104,7 +104,7 @@ const PlayPage: React.FC = () => {
   }
 
   return <>
-    <BackButton />
+    <FloatingButton Icon={LeftCircleFilled} onClick={()=>navigate(-1)} />
     <CardContainer outerSize="fullsize" innerSpace={{
       style: {
         position: "relative",
