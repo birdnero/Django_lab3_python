@@ -9,7 +9,7 @@ import { colors } from "../config";
 import { ClockCircleOutlined, DeleteFilled, LeftCircleFilled } from "@ant-design/icons";
 import { changeField } from "../utils/HookFolders";
 import EditableField from "../components/EditableField";
-import CardContainer from "../components/Containers";
+import { Container } from "../components/Containers";
 import { useMessage } from "../utils/StateManager";
 
 function formatMinutes(minutes: number) {
@@ -104,97 +104,94 @@ const PlayPage: React.FC = () => {
   }
 
   return <>
-    <FloatingButton Icon={LeftCircleFilled} onClick={()=>navigate(-1)} />
-    <CardContainer outerSize="fullsize" innerSpace={{
-      style: {
-        position: "relative",
-      }
-    }}>
-
-      {data ? <>
-        <DeletePlayButton id={data.play_id} />
-        <EditableField size="h1" textarea={{
-          value: data.name,
-          onChange: v => (changeField(v.currentTarget.value, "name", setData), setChanged(true))
-        }} />
-        <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-          <Space size={0} direction="vertical">
-            <Space id="author-duration" size="middle">
-              <Space style={{ alignItems: "start" }}>
-                <Typography>
-                  Автор:
-                </Typography>
-                <EditableField size="fixed" textarea={{
-                  value: data.author,
-                  onChange: v => (changeField(v.currentTarget.value, "author", setData), setChanged(true)),
-                }} />
-              </Space>
-              <Space>
-                <ClockCircleOutlined style={{
-                  fontSize: 20,
-                  color: colors["primary-txt"],
-                }} />
-                <Space size={0} wrap style={{ alignContent: "start", width: "fit-content" }}>
-                </Space>
-                <EditableField size="fixed" textarea={{
-                  value: formatMinutes(data.duration),
-                  onChange: v => {
-                    const time = parseTimeString(v.currentTarget.value)
-                    if (time) {
-                      const inputEl = v.currentTarget
-                      const curpos = inputEl.selectionStart || 0
-                      changeField(time[0] * 60 + time[1], "duration", setData)
-                      setTimeout(() => {
-                        inputEl.setSelectionRange(curpos, curpos)
-                        setChanged(true)
-                      }, 0)
-                    }
-                  },
-                }} />
-              </Space>
-            </Space>
-            <Space size={0}>
-              <Typography>
-                Жанр:
-              </Typography>
-              <Select className="select-edit"
-                suffixIcon={false}
-                popupMatchSelectWidth={false}
-                options={genres ? (genres.map(genre => ({ value: genre.genre_id, label: <Typography>{genre.name}</Typography> }))) : [(((typeof data.genre) == "number") ?
-                  { value: data.genre, label: <Typography>{data.genre}</Typography> } :
-                  { value: data.genre.genre_id, label: <Typography>{data.genre.name}</Typography> })]}
-                value={(typeof data.genre) == "number" ? data.genre : data.genre.genre_id}
-                onChange={v => {
-                  if ((typeof data.genre) == "number") {
-                    changeField(v, "genre", setData)
-                  } else if (genres) {
-                    <Typography></Typography>
-                    changeField(genres.filter(g => g.genre_id == v)[0], "genre", setData)
-                  }
-                  setChanged(true)
-                }} variant="borderless"
-                style={{
-                  width: "fit-content",
-                  padding: 0
-                }}
-
-
-              />
-            </Space>
-          </Space>
-          <EditableField textarea={{
-            value: data.description,
-            onChange: v => (changeField(v.currentTarget.value, "description", setData), setChanged(true)),
+    <FloatingButton Icon={LeftCircleFilled} onClick={() => navigate(-1)} />
+    <Container template="outer" containerSize="fullsize">
+      <Container template="inner" containerSize="compact" props={{ style: { paddingTop: 16, position: "relative" } }}>
+        {data ? <>
+          <DeletePlayButton id={data.play_id} />
+          <EditableField size="h1" textarea={{
+            value: data.name,
+            onChange: v => (changeField(v.currentTarget.value, "name", setData), setChanged(true))
           }} />
+          <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+            <Space size={0} direction="vertical">
+              <Space id="author-duration" size="middle">
+                <Space style={{ alignItems: "start" }}>
+                  <Typography>
+                    Автор:
+                  </Typography>
+                  <EditableField size="fixed" textarea={{
+                    value: data.author,
+                    onChange: v => (changeField(v.currentTarget.value, "author", setData), setChanged(true)),
+                  }} />
+                </Space>
+                <Space>
+                  <ClockCircleOutlined style={{
+                    fontSize: 20,
+                    color: colors["primary-txt"],
+                  }} />
+                  <Space size={0} wrap style={{ alignContent: "start", width: "fit-content" }}>
+                  </Space>
+                  <EditableField size="fixed" textarea={{
+                    value: formatMinutes(data.duration),
+                    onChange: v => {
+                      const time = parseTimeString(v.currentTarget.value)
+                      if (time) {
+                        const inputEl = v.currentTarget
+                        const curpos = inputEl.selectionStart || 0
+                        changeField(time[0] * 60 + time[1], "duration", setData)
+                        setTimeout(() => {
+                          inputEl.setSelectionRange(curpos, curpos)
+                          setChanged(true)
+                        }, 0)
+                      }
+                    },
+                  }} />
+                </Space>
+              </Space>
+              <Space size={0}>
+                <Typography>
+                  Жанр:
+                </Typography>
+                <Select className="select-edit"
+                  suffixIcon={false}
+                  popupMatchSelectWidth={false}
+                  options={genres ? (genres.map(genre => ({ value: genre.genre_id, label: <Typography>{genre.name}</Typography> }))) : [(((typeof data.genre) == "number") ?
+                    { value: data.genre, label: <Typography>{data.genre}</Typography> } :
+                    { value: data.genre.genre_id, label: <Typography>{data.genre.name}</Typography> })]}
+                  value={(typeof data.genre) == "number" ? data.genre : data.genre.genre_id}
+                  onChange={v => {
+                    if ((typeof data.genre) == "number") {
+                      changeField(v, "genre", setData)
+                    } else if (genres) {
+                      <Typography></Typography>
+                      changeField(genres.filter(g => g.genre_id == v)[0], "genre", setData)
+                    }
+                    setChanged(true)
+                  }} variant="borderless"
+                  style={{
+                    width: "fit-content",
+                    padding: 0
+                  }}
 
-        </Space>
-        {isChanged ? <Space style={{ width: "100%", justifyContent: "center", marginTop: 32 }}>
-          {data ? <Button color="pink" variant="solid" shape="round" onClick={saveFields}>
-            Зберегти
-          </Button> : null}
-        </Space> : null}
-      </> : null}
-    </CardContainer>
+
+                />
+              </Space>
+            </Space>
+            <EditableField textarea={{
+              value: data.description,
+              onChange: v => (changeField(v.currentTarget.value, "description", setData), setChanged(true)),
+            }} />
+
+          </Space>
+          {isChanged ? <Space style={{ width: "100%", justifyContent: "center", marginTop: 32 }}>
+            {data ? <Button color="pink" variant="solid" shape="round" onClick={saveFields}>
+              Зберегти
+            </Button> : null}
+          </Space> : null}
+        </> : null}
+      </Container>
+    </Container>
 
   </>
 }

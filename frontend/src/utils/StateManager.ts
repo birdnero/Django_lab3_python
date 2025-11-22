@@ -17,6 +17,12 @@ export const useMessage = create<MessageStateT>(set => ({
 }))
 
 export const useToken = create<TokenStateT>(set => ({
-    token: "",
-    setToken: newToken => set({ token: newToken })
+    token: (() => {
+        const accessToken = localStorage.getItem("access-token")
+        return accessToken ? accessToken : ""
+    })(),
+    setToken: newToken => {
+        localStorage.setItem("access-token", newToken)
+        set({ token: newToken })
+    }
 }))

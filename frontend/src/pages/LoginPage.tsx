@@ -3,11 +3,12 @@ import { useState } from "react";
 import { postQuery } from "../utils/RestUtils";
 import { type UserLogin } from '../utils/ApiDtos';
 import { Button, Input, message, Space, Typography } from "antd";
-import BackButton from "../components/FloatingButton";
-import CardContainer from "../components/Containers";
+import { FloatingButton } from "../components/FloatingButton";
+import { Container } from "../components/Containers";
 import { changeField, checkAllFilled } from "../utils/HookFolders";
 import { useNavigate } from "react-router-dom";
 import { useToken } from "../utils/StateManager";
+import { LeftCircleFilled } from "@ant-design/icons";
 
 
 const EmptyUserLogin: UserLogin = {
@@ -32,10 +33,10 @@ const LoginPage: React.FC = () => {
             postQuery(`login/`, data).then(r => {
                 const success = (r: { access: string }) => {
                     setToken(r.access)
-                    messageApi.success("succesfully saved!", 1).then(() => navigate("/"))
+                    messageApi.success("succesfully saved!", 1).then(() => navigate(-1))
                 }
 
-                r ? success(r as { access: string }) : messageApi.error("error ocurred", 0.5).then(()=>setloading(false))
+                r ? success(r as { access: string }) : messageApi.error("error ocurred", 0.5).then(() => setloading(false))
             })
         }
 
@@ -43,49 +44,51 @@ const LoginPage: React.FC = () => {
 
     return <>
         {contextHolder}
-        <BackButton />
-        <CardContainer outerSize="fullsize" innerSize="compact"  >
-            {data ? <form onSubmit={loginMe} >
-                <Typography.Title style={{ width: "100%" }}>
-                    Вхід
-                </Typography.Title>
-                <Space direction="vertical" size={0} >
-                    <Space direction="vertical" size="small" >
-                        <Input
-                            type="text"
-                            name="username"
-                            autoComplete="email"
-                            placeholder="Пошта"
-                            value={data.email}
-                            onInput={v => changeField(v.currentTarget.value, "email", setData)}
-                            variant="borderless"
-                            style={{
-                                padding: 0,
-                            }}
-                        />
-                        <Input.Password
-                            visibilityToggle={false}
-                            name="password"
-                            autoComplete="current-password"
-                            placeholder="Пароль"
-                            type="password"
-                            value={data.password}
-                            onInput={v => changeField(v.currentTarget.value, "password", setData)}
-                            variant="borderless"
-                            style={{
-                                padding: 0,
-                            }}
-                        />
+        <FloatingButton Icon={LeftCircleFilled} onClick={() => navigate("/")} />
+        <Container containerSize="fullsize" template="outer" >
+            <Container containerSize="compact" template="inner" props={{ style: { paddingTop: 0 } }} >
+                {data ? <form onSubmit={loginMe} >
+                    <Typography.Title style={{ width: "100%" }}>
+                        Вхід
+                    </Typography.Title>
+                    <Space direction="vertical" size={0} >
+                        <Space direction="vertical" size="small" >
+                            <Input
+                                type="text"
+                                name="username"
+                                autoComplete="email"
+                                placeholder="Пошта"
+                                value={data.email}
+                                onInput={v => changeField(v.currentTarget.value, "email", setData)}
+                                variant="borderless"
+                                style={{
+                                    padding: 0,
+                                }}
+                            />
+                            <Input.Password
+                                visibilityToggle={false}
+                                name="password"
+                                autoComplete="current-password"
+                                placeholder="Пароль"
+                                type="password"
+                                value={data.password}
+                                onInput={v => changeField(v.currentTarget.value, "password", setData)}
+                                variant="borderless"
+                                style={{
+                                    padding: 0,
+                                }}
+                            />
+                        </Space>
+                        {checkAllFilled(data, EmptyUserLogin) && <Space style={{ width: "100%", justifyContent: "center", marginTop: 32 }}>
+                            <Button loading={loading} disabled={loading} htmlType="submit" color="pink" variant="solid" shape="round">
+                                Увійти
+                            </Button>
+                        </Space>}
                     </Space>
-                    {checkAllFilled(data, EmptyUserLogin) && <Space style={{ width: "100%", justifyContent: "center", marginTop: 32 }}>
-                        <Button loading={loading} disabled={loading} htmlType="submit" color="pink" variant="solid" shape="round">
-                            Увійти
-                        </Button>
-                    </Space>}
-                </Space>
 
-            </form> : null}
-        </CardContainer>
+                </form> : null}
+            </Container>
+        </Container>
     </>
 }
 

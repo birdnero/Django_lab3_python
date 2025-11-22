@@ -5,33 +5,34 @@ import { colors } from "../config"
 
 
 const CardStyles: {
-    space: {
-        default: React.CSSProperties,
+    template: {
+        outer: React.CSSProperties,
+        inner: React.CSSProperties,
+    },
+    containerSize: {
         compact: React.CSSProperties,
         fullsize: React.CSSProperties,
         fullwindow: React.CSSProperties,
-        fixed: React.CSSProperties,
     },
-    innerSpace: {
-        default: React.CSSProperties,
-        compact: React.CSSProperties,
-        fixed: React.CSSProperties,
-        fullsize: React.CSSProperties,
-    }
 } = {
-    space: {
-        default: {
+    template: {
+        outer: {
             columnGap: 0,
             justifyContent: "center",
-            alignContent: "center",
+            // alignContent: "center",
+            // justifyItems: "center",
+            alignItems: "center",
             backgroundColor: colors.primary,
         },
+        inner: {
+            padding: 32,
+            borderRadius: 32,
+            backgroundColor: colors.secondary,
+        },
+    },
+    containerSize: {
         compact: {
             width: "fit-content",
-            // height: "100%",
-        },
-        fixed: {
-            // width: "100%",
             // height: "100%",
         },
         fullsize: {
@@ -40,69 +41,33 @@ const CardStyles: {
         },
         fullwindow: {
             width: "100dvw",
-            // height: "100%",
+            height: "100%",
         },
     },
-    innerSpace: {
-        default: {
-            padding: 32,
-            paddingTop: 0,
-            paddingBottom: 24,
-            borderRadius: 32,
-            backgroundColor: colors.secondary,
-        },
-        compact: {
-            width: "fit-content",
-            // height: "100%",
-        },
-        fixed: {
-            // width: "100%",
-            // height: "100%",
-        },
-        fullsize: {
-            width: "100%",
-        }
-    },
-
 }
 
 export interface CardContainerProps {
-    outerSize?: "compact" | "fullsize" | "fullwindow" | "fixed",
-    innerSize?: "compact" | "fixed" | "fullsize",
-    space?: SpaceProps,
-    innerSpace?: SpaceProps
+    containerSize?: "compact" | "fullsize" | "fullwindow",
+    template?: "outer" | "inner"
+    props?: SpaceProps
 }
 
-const CardContainer: React.FC<PropsWithChildren<CardContainerProps>> = ({
-    outerSize = "compact",
-    innerSize = "compact",
-    space,
-    innerSpace,
+export const Container: React.FC<PropsWithChildren<CardContainerProps>> = ({
+    containerSize = "compact",
+    template = "outer",
+    props,
     children
 }) => {
-    const { wrap = false } = space ? space : {}
-    const { size = 0, direction = "vertical" } = innerSpace ? innerSpace : {}
     return <Space
-        wrap={wrap}
-        {...space}
-        style={{
-            ...CardStyles.space.default,
-            ...CardStyles.space[outerSize],
-            ...space?.style,
-        }}>
-        <Space
-            {...innerSpace}
-            size={size}
-            direction={direction}
+        size={0}
+        direction="vertical"
+        {...props}
 
-            style={{
-                ...CardStyles.innerSpace.default,
-                ...CardStyles.innerSpace[innerSize],
-                ...innerSpace?.style,
-            }}>
-            {children}
-        </Space>
+        style={{
+            ...CardStyles.template[template],
+            ...CardStyles.containerSize[containerSize],
+            ...props?.style,
+        }}>
+        {children}
     </Space>
 }
-
-export default CardContainer
