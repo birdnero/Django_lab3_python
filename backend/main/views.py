@@ -11,7 +11,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 class BaseViewSet(viewsets.ViewSet):
     repository = None
     serializer_class = None
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def list(self, _):
         objs = self.repository.get_all()

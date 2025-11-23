@@ -5,3 +5,5 @@ dotenv
 djangorestframework-simplejwt
 psycopg2
 django-cors-headers
+pillow
+legacy-cgi
