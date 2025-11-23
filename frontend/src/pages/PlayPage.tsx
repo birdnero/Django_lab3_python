@@ -7,7 +7,7 @@ import { Button, Select, Space, Typography } from "antd";
 import { FloatingButton } from "../components/FloatingButton";
 import { colors } from "../config";
 import { ClockCircleOutlined, DeleteFilled, LeftCircleFilled, UndoOutlined } from "@ant-design/icons";
-import { changeField, changeTime, checkAllFilled, checkSame } from "../utils/HookFolders";
+import { changeField, changeTime, checkSame } from "../utils/HookFolders";
 import EditableField from "../components/EditableField";
 import { Container } from "../components/Containers";
 import { useMessage } from "../utils/StateManager";
@@ -15,7 +15,6 @@ import { duration2str } from "../utils/DurationUtils";
 import Icon from "../components/Icon";
 import { arrow1_1, arrow1_2 } from "../utils/IconPaths";
 import { createDraggable, createScope, spring, Scope } from "animejs";
-import { SmoothButton } from "./LoginPage";
 import { FloatingContainer } from "../components/FloatingContainer";
 
 const PlayPage: React.FC = () => {
@@ -24,7 +23,6 @@ const PlayPage: React.FC = () => {
   const [lastSavedData, setLastSavedData] = useState<Play | null>(null)
   const messageApi = useMessage(s => s.messageApi)
   const [genres, setGenres] = useState<Genre[] | null>(null)
-  // const [isChanged, setChanged] = useState<boolean>(false)
   const navigate = useNavigate()
   const scope = useRef<Scope>(null)
   const refScope = useRef<HTMLDivElement>(null)
@@ -79,7 +77,7 @@ const PlayPage: React.FC = () => {
     return () => scope.current?.revert()
   }, [NodeIterator, data?.duration])
 
-  useEffect(() => SmoothButton(containerRef, buttonRef, () => (data != null && lastSavedData != null && !checkSame(data, lastSavedData))), [data])
+  // useEffect(() => SmoothButton(containerRef, buttonRef, () => (data != null && lastSavedData != null && !checkSame(data, lastSavedData))), [data])
 
   return <>
     <FloatingButton Icon={LeftCircleFilled} onClick={() => navigate(-1)} />
@@ -161,7 +159,7 @@ const PlayPage: React.FC = () => {
                 <Typography style={{ color: colors["primary-txt"] + "99" }}>
                   Автор:
                 </Typography>
-                <EditableField size="fixed" textarea={{
+                <EditableField textarea={{
                   value: data.author,
                   onChange: v => (changeField(v.currentTarget.value, "author", setData)),
                 }} />
@@ -209,11 +207,11 @@ const PlayPage: React.FC = () => {
               onChange: v => (changeField(v.currentTarget.value, "description", setData)),
             }} />
 
-            <Space ref={buttonRef} style={{ width: "100%", justifyContent: "center", display: "none" }}>
+            {data != null && lastSavedData != null && !checkSame(data, lastSavedData) && <Space ref={buttonRef} style={{ width: "100%", justifyContent: "center" }}>
               <Button color="pink" variant="solid" shape="round" onClick={handleSave}>
                 Зберегти
               </Button>
-            </Space>
+            </Space>}
           </Space>
         </> : null}
       </Container>
