@@ -20,7 +20,6 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
         fields = "__all__"
 
-
 class PlaySerializer(serializers.ModelSerializer):
     # actors = serializers.PrimaryKeyRelatedField(queryset=Actor.objects.all(), many=True)
     # directors = serializers.PrimaryKeyRelatedField(queryset=Director.objects.all(), many=True)
@@ -67,6 +66,7 @@ class PlaySerializer(serializers.ModelSerializer):
             instance.directors.set(director_ids)
 
         return instance
+    
 
 
 class HallSerializer(serializers.ModelSerializer):

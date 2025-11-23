@@ -1,7 +1,3 @@
-mkdir backend
-django-admin startproject myproject backend
-
-
 інструменти: 
     sops: менеджер для шифрування, як pgp тільки простіше  
      age: асиметричне шифрування
@@ -21,8 +17,6 @@ sops --config .sops.yml --input-type dotenv --output-type dotenv --encrypt backe
 
 розкодувати
 sops --config .sops.yml --input-type dotenv --output-type dotenv --decrypt backend/.env.enc > backend/.env
-
-
 
 ---------------------------------------------------------------------------------------------------------
 
@@ -55,15 +49,18 @@ sops --config .sops.yml --input-type dotenv --output-type dotenv --decrypt backe
         за посиланням /swagger щоб отримати доступ до захищених посилань потрібно нажати угорі Authorize ввести таке "Bearer access_token" де access_token замінити на свій
 
 
-
-
 для нормального зaпуску потрібно запустити (due to replacement of docker-compose.yml)
 docker run --rm -v backend_db_lab:/from -v lab3_python_db_lab:/to alpine sh -c "cp -a /from/. /to/"
 а далі з кореня проекту 
 docker-compose --env-file ./backend/.env up
 
-
 в нас в бд вказано обмеження на тривалысть вистави у 10 годин...
 
 git config user.email "neroforwork@gmail.com"
 git config user.name "birdnero"
+
+---------------------------------------------------------------------------------------------------------
+Зайти в контейнер, аби звідти мігрувати
+docker-compose --env-file ./backend/.env exec backend bash
+python3 manage.py migrate main
+

@@ -4,6 +4,8 @@ from . import views
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
+from django.conf import settings
+from django.conf.urls.static import static
 
 router = routers.DefaultRouter()
 router.register(r"actors", views.ActorViewSet, basename="actor")
@@ -21,3 +23,6 @@ urlpatterns = [
     path('login/', views.MyTokenObtainPairView.as_view()),
     path('login/refresh/', TokenRefreshView.as_view()),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
