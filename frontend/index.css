@@ -52,6 +52,17 @@ body {
   scale: 1.2;
 }
 
+
+.animated-icon:hover .animated-icon-self-accent {
+  color: #eb2f96;
+  scale: 1.1;
+}
+
+.animated-icon:active .animated-icon-self-accent {
+  color: #eb2f96;
+  scale: 1.2;
+}
+
 .input-number-edit,
 .input-number-edit>div {
   width: fit-content;
@@ -100,13 +111,29 @@ input:-webkit-autofill {
   }
 }
 
-.fade-apear{
+.fade-apear {
   opacity: 0;
   animation: fade-apear 1650ms linear alternate forwards;
 }
 
 @keyframes fade-apear {
-  to{
+  to {
     opacity: 1;
   }
+}
+
+.ant-select-selection-item-content {
+  margin-right: 12px;
+}
+
+.ant-select-selection-item{
+  background: transparent !important;
+}
+
+.ant-select-selection-item-remove{
+  display: none !important;
+}
+
+.ant-select-selection-item:hover .ant-select-selection-item-remove{
+  display: inline-flex !important;
 }

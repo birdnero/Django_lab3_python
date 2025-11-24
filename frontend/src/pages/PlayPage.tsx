@@ -2,7 +2,7 @@ import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { deleteQuery, getQuery, putQuery } from "../utils/RestUtils";
-import { type Genre, type Play } from '../utils/ApiDtos';
+import { type Actor, type Director, type Genre, type Play } from '../utils/ApiDtos';
 import { Button, Select, Space, Typography } from "antd";
 import { FloatingButton } from "../components/FloatingButton";
 import { colors } from "../config";
@@ -23,7 +23,9 @@ const PlayPage: React.FC = () => {
   const [boolData, setBoolData] = useState<boolObj<Play>>({})
   const [lastSavedData, setLastSavedData] = useState<Play | null>(null)
   const messageApi = useMessage(s => s.messageApi)
-  const [genres, setGenres] = useState<Genre[] | null>(null)
+  const [genres, setGenres] = useState<Genre[]>([])
+  const [actors, setActors] = useState<Actor[]>([])
+  const [directors, setDirectors] = useState<Director[]>([])
   const navigate = useNavigate()
   const scope = useRef<Scope>(null)
   const refScope = useRef<HTMLDivElement>(null)
@@ -43,8 +45,8 @@ const PlayPage: React.FC = () => {
       const Data = {
         ...data,
         genre_id: typeof data.genre === "number" ? data.genre : data.genre.genre_id,
-        actor_ids: [],
-        director_ids: [],
+        actor_ids: data.actors.length > 0 && (typeof data.actors[0]) != "number" ? data.actors.map(a => (a as Actor).actor_id) : data.actors,
+        director_ids: data.directors.length > 0 && (typeof data.directors[0]) != "number" ? data.directors.map(a => (a as Director).director_id) : data.directors,
       }
       putQuery(`api/plays/${Data.play_id}/`, Data).then(r => r ? (setLastSavedData(data), messageApi?.success("succesfully saved!", 0.5)) : messageApi?.error("error ocurred", 0.5))
     }
@@ -82,22 +84,26 @@ const PlayPage: React.FC = () => {
 
 
   useEffect(() => {
-    getQuery(`api/plays/${params.playid}`).then(e => {
+    getQuery(`api/plays/${params.playid}`).then((e) => {
       if (e) {
         setData(e as Play)
         setLastSavedData(e as Play)
         setBoolData(checkForCorectness(e as Play))
       } else {
-        navigate("/error")
+        navigate("/error");
       }
-    })
-    getQuery(`api/genres`).then(e => {
-      if (e) {
-        setGenres(e as Genre[])
-      }
-    })
-  }, [params.playid, navigate])
+    });
 
+    getQuery(`api/genres`).then((e) => {
+      if (e) setGenres(e as Genre[]);
+    });
+    getQuery(`api/actors`).then((e) => {
+      if (e) setActors(e as Actor[]);
+    });
+    getQuery(`api/directors`).then((e) => {
+      if (e) setDirectors(e as Director[]);
+    });
+  }, [params.playid, navigate]);
 
   useEffect(() => {
     if (data) {
@@ -191,20 +197,22 @@ const PlayPage: React.FC = () => {
             {!checkSame(data, lastSavedData) && <FloatingButton
               style={{
                 fontSize: 24,
-                color: colors["accent"] + "66",
+                color: colors["primary-txt"] + "79",
               }}
               inContainer
               Icon={UndoOutlined}
               onClick={() => setData(lastSavedData)}
+              props={{className: "animated-icon-self-accent"}}
             />}
             <FloatingButton
               style={{
                 fontSize: 24,
-                color: colors["accent"] + "66",
+                color: colors["primary-txt"] + "79",
               }}
               inContainer
               Icon={DeleteFilled}
               onClick={() => handleDelete(data.play_id)}
+              props={{className: "animated-icon-self-accent"}}
             />
           </FloatingContainer>
 
@@ -343,18 +351,83 @@ const PlayPage: React.FC = () => {
                     if ((typeof data.genre) == "number") {
                       changeField(v, "genre", setData)
                     } else if (genres) {
-                      <Typography></Typography>
                       changeField(genres.filter(g => g.genre_id == v)[0], "genre", setData)
                     }
                   }} variant="borderless"
                   style={{
                     width: "fit-content",
                     padding: 0
-                  }}
-
-
-                />
+                  }} />
               </Space>
+
+              <Space size={0} style={{ alignItems: "start" }}>
+                <div style={{ alignItems: "start", display: "inline-flex", flexDirection: "column" }}>
+                  <Typography style={{ wordBreak: "revert", color: colors["primary-txt"] + "99" }}>Актори:</Typography>
+                  <Select
+                    popupMatchSelectWidth={false}
+                    menuItemSelectedIcon={false}
+                    showSearch={false}
+                    suffixIcon={null}
+                    variant="borderless"
+                    mode="multiple"
+
+                    placeholder="тут актори"
+                    options={actors.map((a) => ({
+                      value: a.actor_id,
+                      label: <Typography style={{ width: "max-content" }}>{a.name}</Typography>,
+                    }))}
+                    value={data.actors.length > 0 ? ((typeof data.actors[0]) == "number" ? (data.actors as number[]) : data.actors.map(a => (a as Actor).actor_id)) : []}
+                    onChange={ids => {
+                      if (data.actors.length > 0 && (typeof data.actors[0]) == "number") {
+                        changeField(ids, "actors", setData)
+                      } else {
+                        changeField(actors.filter(a => !ids.every(id => id != a.actor_id)), "actors", setData)
+                      }
+                    }}
+
+                    style={{
+                      width: 200,
+                      padding: 0
+                    }}
+                    styles={{ popup: { root: { width: "fit-content" } } }}
+                  />
+                </div>
+
+
+                <div style={{ alignItems: "start", display: "inline-flex", flexDirection: "column" }}>
+                  <Typography style={{ wordBreak: "revert", color: colors["primary-txt"] + "99" }}>Продюсери:</Typography>
+                  <Select
+                    popupMatchSelectWidth={false}
+                    menuItemSelectedIcon={false}
+                    showSearch={false}
+                    suffixIcon={null}
+                    variant="borderless"
+                    mode="multiple"
+
+                    placeholder="я продюсер"
+                    options={directors.map((d) => ({
+                      value: d.director_id,
+                      label: <Typography style={{ width: "max-content" }}>{d.name}</Typography>,
+                    }))}
+                    value={data.directors.length > 0 ? ((typeof data.directors[0]) == "number" ? (data.directors as number[]) : data.directors.map(a => (a as Director).director_id)) : []}
+                    onChange={(ids: number[]) => {
+
+                      if (data.directors.length > 0 && (typeof data.directors[0]) == "number") {
+                        changeField(ids, "directors", setData)
+                      } else {
+                        changeField(directors.filter(a => !ids.every(id => id != a.director_id)), "directors", setData)
+                      }
+                    }}
+                    style={{
+                      width: 200,
+                      padding: 0
+                    }}
+                    styles={{ popup: { root: { width: "fit-content" } } }}
+                  />
+                </div>
+              </Space>
+
+
             </Space>
             <EditableField textarea={{
               value: data.description,
@@ -373,5 +446,6 @@ const PlayPage: React.FC = () => {
 
   </>
 }
+
 
 export default PlayPage;
