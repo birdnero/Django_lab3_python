@@ -1,9 +1,9 @@
 import type React from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { deleteQuery, getQuery } from "../utils/RestUtils";
 import { type Actor, type Director, type Genre, type Play } from "../utils/ApiDtos";
-import { Button, Select, Space, Typography } from "antd";
+import { Button, Popover, Select, Space, Typography } from "antd";
 import { FloatingButton } from "../components/FloatingButton";
 import { colors } from "../config";
 import { ClockCircleOutlined, DeleteFilled, LeftCircleFilled, UndoOutlined } from "@ant-design/icons";
@@ -97,7 +97,7 @@ const CRUDPlayPage: React.FC<CRUDPageProps<Play>> = ({
   const [genres, setGenres] = useState<Genre[]>([]);
   const [actors, setActors] = useState<Actor[]>([]);
   const [directors, setDirectors] = useState<Director[]>([]);
-  const [correctnessWarningTxt, setCorrectnessWarningTxt] = useState<string>("");
+  const [correctnessWarningTxt, setCorrectnessWarningTxt] = useState<ReactNode | string>("");
 
   const scope = useRef<Scope>(null);
   const refScope = useRef<HTMLDivElement>(null);
@@ -129,11 +129,37 @@ const CRUDPlayPage: React.FC<CRUDPageProps<Play>> = ({
   };
 
 
-  const getTextForCorrectnessWarning = (data?: Play) => {
-    if (!data) return "";
-    //TODO думаю залишу це на Олену, якщо вона захоче
-    return "TODO";
+  const getTextForCorrectnessWarning = (boolData?: boolObj<Play>) => {
+    if (!boolData) return <></>;
+
+    return <>
+      {!boolData.name && <Typography style={{ color: colors.primary }}>
+        А де назва? еееей!!? 🤬
+      </Typography>}
+      {!boolData.description && <Typography style={{ color: colors.primary }}>
+        ти бачив? там в низу опис є...
+      </Typography>}
+      {!boolData.genre && <Typography style={{ color: colors.primary }}>
+        кстаті вистав жанр мають щавжди😊😊
+      </Typography>}
+    </>
   };
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (data && lastSavedData && !checkSame(data, lastSavedData)) {
+        e.preventDefault()
+        e.returnValue = "" // required for Chrome
+      }
+    }
+
+    window.addEventListener("beforeunload", handleBeforeUnload)
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload)
+    }
+  }, [data])
+
+  
 
   //стягує плей та потрібні для неї поля з foreign key constraint
   useEffect(() => {
@@ -159,11 +185,14 @@ const CRUDPlayPage: React.FC<CRUDPageProps<Play>> = ({
   }, [params.playid, navigate]);
 
   useEffect(() => {
-    if (data) {
+    if (data)
       setBoolData(play2validationObj(data));
-      setCorrectnessWarningTxt(getTextForCorrectnessWarning(data));
-    }
   }, [data]);
+
+  useEffect(() => {
+    if (data)
+      setCorrectnessWarningTxt(getTextForCorrectnessWarning(boolData));
+  }, [boolData]);
 
   //анімації стрілок
   useEffect(() => {
@@ -272,6 +301,7 @@ const CRUDPlayPage: React.FC<CRUDPageProps<Play>> = ({
                         bottom: 70,
                         padding: 16,
                         minWidth: 160,
+                        width: "max-content",
                         rotate: "-5deg",
                       },
                     }}
@@ -305,16 +335,34 @@ const CRUDPlayPage: React.FC<CRUDPageProps<Play>> = ({
                     props={{ className: "animated-icon-self-accent" }}
                   />
                 )}
-                {actions?.includes("delete") && <FloatingButton
-                  style={{
-                    fontSize: 24,
-                    color: colors["primary-txt"] + "79",
-                  }}
-                  inContainer
-                  Icon={DeleteFilled}
-                  onClick={() => handleDelete(data.play_id)}
-                  props={{ className: "animated-icon-self-accent" }}
-                />}
+                {actions?.includes("delete") &&
+                  <Popover
+                    styles={{ body: { borderRadius: 16 } }}
+                    title="Реально видалиш?"
+                    trigger="click"
+                    content={<Button
+                      variant="filled"
+                      type="link"
+                      shape="round"
+                      color="red"
+                      style={{ backgroundColor: colors.primary }}
+                      onClick={() => handleDelete(data.play_id)}>
+                      так я тверезий
+                    </Button>}>
+                    <div>
+                      <FloatingButton
+                        style={{
+                          fontSize: 24,
+                          color: colors["primary-txt"] + "79",
+                        }}
+                        inContainer
+                        Icon={DeleteFilled}
+                        onClick={() => { }}
+                        props={{ className: "animated-icon-self-accent" }}
+                      />
+                    </div>
+                  </Popover>}
+
               </FloatingContainer>
 
               {/* title */}

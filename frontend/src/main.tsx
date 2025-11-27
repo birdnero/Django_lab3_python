@@ -56,6 +56,12 @@ const AntdTheme: ThemeConfig = {
     Message: {
       contentBg: colors.secondary
     },
+    Popover: {
+      colorBgElevated: colors["floating-btn"],
+      colorText: colors.primary,
+      colorTextHeading: colors.primary,
+      titleMinWidth: "max-content",
+    },
     Input: {
       colorBgBase: colors.accent,
       colorBorder: colors.accent,
