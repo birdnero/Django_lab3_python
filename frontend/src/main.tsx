@@ -61,7 +61,7 @@ const AntdTheme: ThemeConfig = {
       colorBorder: colors.accent,
       activeBorderColor: colors.accent,
       hoverBorderColor: colors.accent,
-      
+
     }
   }
 }
@@ -69,7 +69,7 @@ const AntdTheme: ThemeConfig = {
 const Main: React.FC = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const setMessageApi = useMessage(s => s.setMessageApi)
-  
+
   useEffect(() => {
     setMessageApi(messageApi);
   }, [messageApi, setMessageApi]);
