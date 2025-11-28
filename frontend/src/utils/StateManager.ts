@@ -11,6 +11,11 @@ type TokenStateT = {
     setToken: (newToken: string) => void
 }
 
+type InFirstT = {
+    inFirst: boolean;
+    setInFirst: (newValue: boolean) => void
+}
+
 export const useMessage = create<MessageStateT>(set => ({
     messageApi: null,
     setMessageApi: (msgApi: MessageInstance) => set({ messageApi: msgApi })
@@ -25,4 +30,10 @@ export const useToken = create<TokenStateT>(set => ({
         localStorage.setItem("access-token", newToken)
         set({ token: newToken })
     }
+}))
+
+
+export const useInFirst = create<InFirstT>(set => ({
+    inFirst: true,
+    setInFirst: (newValue: boolean) => set({ inFirst: newValue })
 }))

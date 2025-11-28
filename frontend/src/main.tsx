@@ -62,6 +62,9 @@ const AntdTheme: ThemeConfig = {
       colorTextHeading: colors.primary,
       titleMinWidth: "max-content",
     },
+    Tooltip: {  
+      colorBgSpotlight: colors["floating-btn"],
+    },
     Input: {
       colorBgBase: colors.accent,
       colorBorder: colors.accent,

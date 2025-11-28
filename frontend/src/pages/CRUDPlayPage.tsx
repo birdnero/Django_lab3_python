@@ -3,14 +3,14 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { deleteQuery, getQuery } from "../utils/RestUtils";
 import { type Actor, type Director, type Genre, type Play } from "../utils/ApiDtos";
-import { Button, Popover, Select, Space, Typography } from "antd";
+import { Button, Popover, Select, Space, Tooltip, Typography } from "antd";
 import { FloatingButton } from "../components/FloatingButton";
 import { colors } from "../config";
 import { ClockCircleOutlined, DeleteFilled, LeftCircleFilled, UndoOutlined } from "@ant-design/icons";
 import { changeField, changeTime, checkSame } from "../utils/HookFolders";
 import EditableField from "../components/EditableField";
 import { Container } from "../components/Containers";
-import { useMessage } from "../utils/StateManager";
+import { useInFirst, useMessage } from "../utils/StateManager";
 import { duration2str } from "../utils/DurationUtils";
 import Icon from "../components/Icon";
 import { arrow1_1, arrow1_2, arrow2_1, arrow2_2, arrow3_1, arrow3_2 } from "../utils/IconPaths";
@@ -37,11 +37,13 @@ interface CRUDPageProps<T> {
   // кнопка яка появляється, при зміні даних, якщо вони відповідають правилам валідації
   saveBtn: {
     text: string,
-    action: (data: T | null, setLastSavedData: React.Dispatch<React.SetStateAction<T | null>>) => any
+    action: (data: T | null, setLastSavedData: React.Dispatch<React.SetStateAction<T | null>>, setData: React.Dispatch<React.SetStateAction<T | null>>) => any
   },
   // кнопки доступних дій (згори)
   actions?: CRUDPageActionsT[],
-  setInitalData: (id?: string) => Promise<T | null>
+  setInitalData: (id?: string) => Promise<T | null>,
+  tooltip?: boolean,
+  warnUnsaved?: boolean,
 }
 
 
@@ -86,9 +88,13 @@ const CRUDPlayPage: React.FC<CRUDPageProps<Play>> = ({
   saveBtn,
   actions,
   setInitalData,
+  tooltip = true,
+  warnUnsaved = true,
 }) => {
   const params = useParams<{ playid: string }>();
   const messageApi = useMessage((s) => s.messageApi);
+  const inFirst = useInFirst((s) => s.inFirst);
+  const setInFirst = useInFirst((s) => s.setInFirst);
   const navigate = useNavigate();
 
   const [data, setData] = useState<Play | null>(null);
@@ -146,20 +152,18 @@ const CRUDPlayPage: React.FC<CRUDPageProps<Play>> = ({
   };
 
   useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (data && lastSavedData && !checkSame(data, lastSavedData)) {
-        e.preventDefault()
-        e.returnValue = "" // required for Chrome
+    if (warnUnsaved) {
+      const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+        if (data && lastSavedData && !checkSame(data, lastSavedData)) {
+          e.preventDefault()
+          e.returnValue = ""
+        }
       }
-    }
-
-    window.addEventListener("beforeunload", handleBeforeUnload)
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload)
+      window.addEventListener("beforeunload", handleBeforeUnload)
+      return () => { window.removeEventListener("beforeunload", handleBeforeUnload) }
     }
   }, [data])
 
-  
 
   //стягує плей та потрібні для неї поля з foreign key constraint
   useEffect(() => {
@@ -233,123 +237,561 @@ const CRUDPlayPage: React.FC<CRUDPageProps<Play>> = ({
         template="outer"
         containerSize="fullsize"
       >
-        <Container
-          template="inner"
-          containerSize="compact"
-          props={{ style: { paddingTop: 16, position: "relative" } }}
-        >
-          {data &&
-            (!boolData.name || !boolData.genre || !boolData.description) && (
-              <div
-                className="arrow-message fade-apear"
-                ref={refNote3}
-                style={{ position: "absolute", left: 250, top: 0, zIndex: 3 }}
-              >
-                <div style={{ position: "relative" }}>
+        <Tooltip title={tooltip && inFirst && <Typography style={{ color: colors.primary, cursor: "pointer" }} onClick={() => setInFirst(false)}>ти можеш редагувати поля! спробуй!!!🤩 (натисни на мене, щоб я не відображався😢)</Typography>}>
+          <div>
+            <Container
+              template="inner"
+              containerSize="compact"
+              props={{ style: { paddingTop: 16, position: "relative" } }}
+            >
+              {data &&
+                (!boolData.name || !boolData.genre || !boolData.description) && (
                   <div
+                    className="arrow-message fade-apear"
+                    ref={refNote3}
+                    style={{ position: "absolute", left: 250, top: 0, zIndex: 3 }}
+                  >
+                    <div style={{ position: "relative" }}>
+                      <div
+                        style={{
+                          position: "absolute",
+                          right: 0,
+                          bottom: "0px",
+                          rotate: "25deg",
+                        }}
+                      >
+                        <Icon
+                          path={
+                            <g>
+                              <path
+                                d={arrow3_1}
+                                strokeWidth={5}
+                                stroke="currentColor"
+                                style={{
+                                  strokeWidth: "32px",
+                                  animationDuration: "2000ms",
+                                }}
+                                className="arrow1"
+                              />
+                              <path
+                                d={arrow3_2}
+                                strokeWidth={5}
+                                stroke="currentColor"
+                                style={{
+                                  animationDuration: "0ms",
+                                  animationDelay: "1900ms",
+                                  strokeWidth: "32px",
+                                }}
+                                className="arrow2"
+                              />
+                            </g>
+                          }
+                          style={{
+                            width: 80,
+                            color: colors.arrow,
+                          }}
+                          props={{
+                            fill: "none",
+                            viewBox: "0 0 512 512",
+                          }}
+                        />
+                      </div>
+                      <Container
+                        template="inner"
+                        containerSize="compact"
+                        props={{
+                          style: {
+                            position: "absolute",
+                            backgroundColor: colors.arrow,
+                            left: -140,
+                            bottom: 70,
+                            padding: 16,
+                            minWidth: 160,
+                            width: "max-content",
+                            rotate: "-5deg",
+                          },
+                        }}
+                      >
+                        <Typography style={{ color: colors.primary }}>
+                          {correctnessWarningTxt}
+                        </Typography>
+                      </Container>
+                    </div>
+                  </div>
+                )}
+              {data && lastSavedData ? (
+                <>
+                  <FloatingContainer
                     style={{
-                      position: "absolute",
-                      right: 0,
-                      bottom: "0px",
-                      rotate: "25deg",
+                      left: undefined,
+                      right: 24,
+                      top: 12,
                     }}
                   >
-                    <Icon
-                      path={
-                        <g>
-                          <path
-                            d={arrow3_1}
-                            strokeWidth={5}
-                            stroke="currentColor"
+                    {actions?.includes("undo") && !checkSame(data, lastSavedData) && (
+                      <FloatingButton
+                        style={{
+                          fontSize: 24,
+                          color: colors["primary-txt"] + "79",
+                        }}
+                        inContainer
+                        Icon={UndoOutlined}
+                        onClick={() => setData(lastSavedData)}
+                        props={{ className: "animated-icon-self-accent" }}
+                      />
+                    )}
+                    {actions?.includes("delete") &&
+                      <Popover
+                        styles={{ body: { borderRadius: 16 } }}
+                        title="Реально видалиш?"
+                        trigger="click"
+                        content={<Button
+                          variant="filled"
+                          type="link"
+                          shape="round"
+                          color="red"
+                          style={{ backgroundColor: colors.primary }}
+                          onClick={() => handleDelete(data.play_id)}>
+                          так я тверезий
+                        </Button>}>
+                        <div>
+                          <FloatingButton
                             style={{
-                              strokeWidth: "32px",
-                              animationDuration: "2000ms",
+                              fontSize: 24,
+                              color: colors["primary-txt"] + "79",
                             }}
-                            className="arrow1"
+                            inContainer
+                            Icon={DeleteFilled}
+                            onClick={() => { }}
+                            props={{ className: "animated-icon-self-accent" }}
                           />
-                          <path
-                            d={arrow3_2}
-                            strokeWidth={5}
-                            stroke="currentColor"
+                        </div>
+                      </Popover>}
+                  </FloatingContainer>
+                  {/* title */}
+                  <EditableField
+                    size="h1"
+                    textarea={{
+                      placeholder: "Назва шедевру",
+                      ref: titleRef,
+                      value: data.name,
+                      onChange: (v) =>
+                        changeField(v.currentTarget.value, "name", setData),
+                    }}
+                  />
+                  <Space
+                    ref={containerRef}
+                    direction="vertical"
+                    size="middle"
+                    style={{ width: "100%" }}
+                  >
+                    <Space size={0} direction="vertical">
+                      <Space size="middle" style={{ alignItems: "start" }}>
+                        {/* name */}
+                        <Typography style={{ color: colors["primary-txt"] + "99" }}>
+                          Автор:
+                        </Typography>
+                        <div
+                          style={{
+                            position: "relative",
+                            overflow: "visible",
+                          }}>
+                          <EditableField
+                            textarea={{
+                              placeholder: "Автор є?",
+                              value: data.author,
+                              onChange: (v) =>
+                                changeField(
+                                  v.currentTarget.value,
+                                  "author",
+                                  setData
+                                ),
+                            }}
+                          />
+                          {data && !boolData.author && (
+                            <div
+                              className="arrow-message fade-apear"
+                              ref={refNote2}
+                              style={{
+                                position: "absolute",
+                                left: -65,
+                                top: 50,
+                                zIndex: 3,
+                              }}
+                            >
+                              <div style={{ position: "relative" }}>
+                                <div
+                                  style={{
+                                    position: "absolute",
+                                    right: 0,
+                                    bottom: "0px",
+                                    rotate: "20deg",
+                                  }}
+                                >
+                                  <Icon
+                                    path={
+                                      <g>
+                                        <path
+                                          d={arrow2_2}
+                                          strokeWidth={5}
+                                          stroke="currentColor"
+                                          style={{
+                                            strokeWidth: "32px",
+                                          }}
+                                          className="arrow1"
+                                        />
+                                        <path
+                                          d={arrow2_1}
+                                          strokeWidth={5}
+                                          stroke="currentColor"
+                                          style={{
+                                            animationDuration: "0ms",
+                                            animationDelay: "3000ms",
+                                            strokeWidth: "32px",
+                                          }}
+                                          className="arrow2"
+                                        />
+                                      </g>
+                                    }
+                                    style={{
+                                      width: 80,
+                                      color: colors.arrow,
+                                    }}
+                                    props={{
+                                      fill: "none",
+                                      viewBox: "0 0 512 512",
+                                    }}
+                                  />
+                                </div>
+                                <Container
+                                  template="inner"
+                                  containerSize="compact"
+                                  props={{
+                                    style: {
+                                      position: "absolute",
+                                      backgroundColor: colors.arrow,
+                                      right: 20,
+                                      bottom: 80,
+                                      padding: 16,
+                                      minWidth: 160,
+                                      rotate: "10deg",
+                                    },
+                                  }}
+                                >
+                                  <Typography style={{ color: colors.primary }}>
+                                    а хто автор цього шедевру? 🤔🤔🤔
+                                  </Typography>
+                                </Container>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        {/* duration */}
+                        <ClockCircleOutlined
+                          style={{
+                            fontSize: 20,
+                            color: colors["primary-txt"] + "99",
+                          }}
+                        />
+                        <div
+                          style={{
+                            position: "relative",
+                            overflow: "visible",
+                          }}
+                        >
+                          <EditableField
+                            size="fixed"
+                            textarea={{
+                              value: duration2str(data.duration),
+                              onChange: (v) => changeTime(v, setData),
+                            }}
+                          />
+                          {data && !boolData.duration && (
+                            <div
+                              className="arrow-message fade-apear"
+                              ref={refNote1}
+                              style={{
+                                position: "absolute",
+                                right: -45,
+                                top: 80,
+                                zIndex: 3,
+                              }}
+                            >
+                              <div style={{ position: "relative" }}>
+                                <div
+                                  style={{
+                                    position: "absolute",
+                                    right: 0,
+                                    bottom: "0px",
+                                    rotate: "20deg",
+                                  }}
+                                >
+                                  <Icon
+                                    path={
+                                      <g>
+                                        <path
+                                          d={arrow1_1}
+                                          strokeWidth={5}
+                                          stroke="currentColor"
+                                          className="arrow1"
+                                        />
+                                        <path
+                                          d={arrow1_2}
+                                          strokeWidth={5}
+                                          stroke="currentColor"
+                                          className="arrow2"
+                                        />
+                                      </g>
+                                    }
+                                    style={{
+                                      width: 80,
+                                      color: colors.arrow,
+                                    }}
+                                    props={{
+                                      fill: "none",
+                                      viewBox: "0 0 100 100",
+                                    }}
+                                  />
+                                </div>
+                                <Container
+                                  template="inner"
+                                  containerSize="compact"
+                                  props={{
+                                    style: {
+                                      position: "absolute",
+                                      backgroundColor: colors.arrow,
+                                      left: -50,
+                                      bottom: 50,
+                                      padding: 16,
+                                      minWidth: 160,
+                                      rotate: "10deg",
+                                    },
+                                  }}
+                                >
+                                  <Typography style={{ color: colors.primary }}>
+                                    вистави не тривають 0 хв! 🙄 🕓
+                                  </Typography>
+                                </Container>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </Space>
+                      <Space size={0}>
+                        {/* Genre */}
+                        <Typography style={{ color: colors["primary-txt"] + "99" }}>
+                          Жанр:
+                        </Typography>
+                        <Select
+                          placeholder="тикни тут"
+                          className="select-edit"
+                          suffixIcon={false}
+                          popupMatchSelectWidth={false}
+                          options={
+                            genres
+                              ? genres.map((genre) => ({
+                                value: genre.genre_id,
+                                label: <Typography>{genre.name}</Typography>,
+                              }))
+                              : [
+                                typeof data.genre == "number"
+                                  ? {
+                                    value: data.genre,
+                                    label: (
+                                      <Typography>{data.genre}</Typography>
+                                    ),
+                                  }
+                                  : {
+                                    value: data.genre.genre_id,
+                                    label: (
+                                      <Typography>{data.genre.name}</Typography>
+                                    ),
+                                  },
+                              ]
+                          }
+                          value={
+                            typeof data.genre == "number"
+                              ? data.genre
+                              : data.genre.genre_id
+                          }
+                          onChange={(v) => {
+                            if (typeof data.genre == "number") {
+                              changeField(v, "genre", setData);
+                            } else if (genres) {
+                              changeField(
+                                genres.filter((g) => g.genre_id == v)[0],
+                                "genre",
+                                setData
+                              );
+                            }
+                          }}
+                          variant="borderless"
+                          style={{
+                            width: "fit-content",
+                            padding: 0,
+                          }}
+                        />
+                      </Space>
+                      <Space size={0} style={{ alignItems: "start" }}>
+                        <div
+                          style={{
+                            alignItems: "start",
+                            display: "inline-flex",
+                            flexDirection: "column",
+                          }}
+                        >
+                          <Typography
                             style={{
-                              animationDuration: "0ms",
-                              animationDelay: "1900ms",
-                              strokeWidth: "32px",
+                              wordBreak: "revert",
+                              color: colors["primary-txt"] + "99",
                             }}
-                            className="arrow2"
+                          >
+                            Актори:
+                          </Typography>
+                          <Select
+                            placeholder="тикни тут"
+                            popupMatchSelectWidth={false}
+                            menuItemSelectedIcon={false}
+                            showSearch={false}
+                            suffixIcon={null}
+                            variant="borderless"
+                            mode="multiple"
+                            options={actors.map((a) => ({
+                              value: a.actor_id,
+                              label: (
+                                <Typography style={{ width: "max-content" }}>
+                                  {a.name}
+                                </Typography>
+                              ),
+                            }))}
+                            value={
+                              data.actors.length > 0
+                                ? typeof data.actors[0] == "number"
+                                  ? (data.actors as number[])
+                                  : data.actors.map((a) => (a as Actor).actor_id)
+                                : []
+                            }
+                            onChange={(ids) => {
+                              if (
+                                data.actors.length > 0 &&
+                                typeof data.actors[0] == "number"
+                              ) {
+                                changeField(ids, "actors", setData);
+                              } else {
+                                changeField(
+                                  actors.filter(
+                                    (a) => !ids.every((id) => id != a.actor_id)
+                                  ),
+                                  "actors",
+                                  setData
+                                );
+                              }
+                            }}
+                            style={{
+                              width: 200,
+                              padding: 0,
+                            }}
+                            styles={{ popup: { root: { width: "fit-content" } } }}
                           />
-                        </g>
-                      }
-                      style={{
-                        width: 80,
-                        color: colors.arrow,
-                      }}
-                      props={{
-                        fill: "none",
-                        viewBox: "0 0 512 512",
+                        </div>
+                        <div
+                          style={{
+                            alignItems: "start",
+                            display: "inline-flex",
+                            flexDirection: "column",
+                          }}
+                        >
+                          <Typography
+                            style={{
+                              wordBreak: "revert",
+                              color: colors["primary-txt"] + "99",
+                            }}
+                          >
+                            Продюсери:
+                          </Typography>
+                          <Select
+                            placeholder="тикни тут"
+                            popupMatchSelectWidth={false}
+                            menuItemSelectedIcon={false}
+                            showSearch={false}
+                            suffixIcon={null}
+                            variant="borderless"
+                            mode="multiple"
+                            options={directors.map((d) => ({
+                              value: d.director_id,
+                              label: (
+                                <Typography style={{ width: "max-content" }}>
+                                  {d.name}
+                                </Typography>
+                              ),
+                            }))}
+                            value={
+                              data.directors.length > 0
+                                ? typeof data.directors[0] == "number"
+                                  ? (data.directors as number[])
+                                  : data.directors.map(
+                                    (a) => (a as Director).director_id
+                                  )
+                                : []
+                            }
+                            onChange={(ids: number[]) => {
+                              if (
+                                data.directors.length > 0 &&
+                                typeof data.directors[0] == "number"
+                              ) {
+                                changeField(ids, "directors", setData);
+                              } else {
+                                changeField(
+                                  directors.filter(
+                                    (a) => !ids.every((id) => id != a.director_id)
+                                  ),
+                                  "directors",
+                                  setData
+                                );
+                              }
+                            }}
+                            style={{
+                              width: 200,
+                              padding: 0,
+                            }}
+                            styles={{ popup: { root: { width: "fit-content" } } }}
+                          />
+                        </div>
+                      </Space>
+                    </Space>
+                    {/* ОПИС */}
+                    <EditableField
+                      textarea={{
+                        placeholder: "хмм.. А про що це?",
+                        value: data.description,
+                        onChange: (v) =>
+                          changeField(
+                            v.currentTarget.value,
+                            "description",
+                            setData
+                          ),
                       }}
                     />
-                  </div>
-                  <Container
-                    template="inner"
-                    containerSize="compact"
-                    props={{
-                      style: {
-                        position: "absolute",
-                        backgroundColor: colors.arrow,
-                        left: -140,
-                        bottom: 70,
-                        padding: 16,
-                        minWidth: 160,
-                        width: "max-content",
-                        rotate: "-5deg",
-                      },
-                    }}
-                  >
-                    <Typography style={{ color: colors.primary }}>
-                      {correctnessWarningTxt}
-                    </Typography>
-                  </Container>
-                </div>
-              </div>
-            )}
-
-          {data && lastSavedData ? (
-            <>
-              <FloatingContainer
-                style={{
-                  left: undefined,
-                  right: 24,
-                  top: 12,
-                }}
-              >
-                {actions?.includes("undo") && !checkSame(data, lastSavedData) && (
-                  <FloatingButton
-                    style={{
-                      fontSize: 24,
-                      color: colors["primary-txt"] + "79",
-                    }}
-                    inContainer
-                    Icon={UndoOutlined}
-                    onClick={() => setData(lastSavedData)}
-                    props={{ className: "animated-icon-self-accent" }}
-                  />
-                )}
-                {actions?.includes("delete") &&
-                  <Popover
-                    styles={{ body: { borderRadius: 16 } }}
-                    title="Реально видалиш?"
-                    trigger="click"
-                    content={<Button
-                      variant="filled"
-                      type="link"
-                      shape="round"
-                      color="red"
-                      style={{ backgroundColor: colors.primary }}
-                      onClick={() => handleDelete(data.play_id)}>
-                      так я тверезий
-                    </Button>}>
-                    <div>
+                    {data &&
+                      boolData &&
+                      !checkSame(data, lastSavedData) &&
+                      checkValidation(boolData) && (
+                        <Space
+                          ref={buttonRef}
+                          style={{ width: "100%", justifyContent: "center" }}
+                        >
+                          <Button
+                            className="fade-apear"
+                            color="pink"
+                            variant="solid"
+                            shape="round"
+                            onClick={() => saveBtn.action(data, setLastSavedData, setData)}
+                          >
+                            {saveBtn.text}
+                          </Button>
+                        </Space>
+                      )}
+                    <Space>
                       <FloatingButton
                         style={{
                           fontSize: 24,
@@ -357,477 +799,31 @@ const CRUDPlayPage: React.FC<CRUDPageProps<Play>> = ({
                         }}
                         inContainer
                         Icon={DeleteFilled}
-                        onClick={() => { }}
+                        onClick={() => changeField(null, "image", setData)}
                         props={{ className: "animated-icon-self-accent" }}
                       />
-                    </div>
-                  </Popover>}
-
-              </FloatingContainer>
-
-              {/* title */}
-              <EditableField
-                size="h1"
-                textarea={{
-                  placeholder: "Назва шедевру",
-                  ref: titleRef,
-                  value: data.name,
-                  onChange: (v) =>
-                    changeField(v.currentTarget.value, "name", setData),
-                }}
-              />
-              <Space
-                ref={containerRef}
-                direction="vertical"
-                size="middle"
-                style={{ width: "100%" }}
-              >
-                <Space size={0} direction="vertical">
-                  <Space size="middle" style={{ alignItems: "start" }}>
-
-                    {/* name */}
-                    <Typography style={{ color: colors["primary-txt"] + "99" }}>
-                      Автор:
-                    </Typography>
-                    <div
-                      style={{
-                        position: "relative",
-                        overflow: "visible",
-                      }}>
-                      <EditableField
-                        textarea={{
-                          placeholder: "Автор є?",
-                          value: data.author,
-                          onChange: (v) =>
-                            changeField(
-                              v.currentTarget.value,
-                              "author",
-                              setData
-                            ),
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          setData((prev) => {
+                            if (!prev) return prev;
+                            return {
+                              ...prev,
+                              image: file,
+                            };
+                          });
                         }}
                       />
-
-                      {data && !boolData.author && (
-                        <div
-                          className="arrow-message fade-apear"
-                          ref={refNote2}
-                          style={{
-                            position: "absolute",
-                            left: -65,
-                            top: 50,
-                            zIndex: 3,
-                          }}
-                        >
-                          <div style={{ position: "relative" }}>
-                            <div
-                              style={{
-                                position: "absolute",
-                                right: 0,
-                                bottom: "0px",
-                                rotate: "20deg",
-                              }}
-                            >
-                              <Icon
-                                path={
-                                  <g>
-                                    <path
-                                      d={arrow2_2}
-                                      strokeWidth={5}
-                                      stroke="currentColor"
-                                      style={{
-                                        strokeWidth: "32px",
-                                      }}
-                                      className="arrow1"
-                                    />
-                                    <path
-                                      d={arrow2_1}
-                                      strokeWidth={5}
-                                      stroke="currentColor"
-                                      style={{
-                                        animationDuration: "0ms",
-                                        animationDelay: "3000ms",
-                                        strokeWidth: "32px",
-                                      }}
-                                      className="arrow2"
-                                    />
-                                  </g>
-                                }
-                                style={{
-                                  width: 80,
-                                  color: colors.arrow,
-                                }}
-                                props={{
-                                  fill: "none",
-                                  viewBox: "0 0 512 512",
-                                }}
-                              />
-                            </div>
-                            <Container
-                              template="inner"
-                              containerSize="compact"
-                              props={{
-                                style: {
-                                  position: "absolute",
-                                  backgroundColor: colors.arrow,
-                                  right: 20,
-                                  bottom: 80,
-                                  padding: 16,
-                                  minWidth: 160,
-                                  rotate: "10deg",
-                                },
-                              }}
-                            >
-                              <Typography style={{ color: colors.primary }}>
-                                а хто автор цього шедевру? 🤔🤔🤔
-                              </Typography>
-                            </Container>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* duration */}
-                    <ClockCircleOutlined
-                      style={{
-                        fontSize: 20,
-                        color: colors["primary-txt"] + "99",
-                      }}
-                    />
-                    <div
-                      style={{
-                        position: "relative",
-                        overflow: "visible",
-                      }}
-                    >
-                      <EditableField
-                        size="fixed"
-                        textarea={{
-                          value: duration2str(data.duration),
-                          onChange: (v) => changeTime(v, setData),
-                        }}
-                      />
-
-                      {data && !boolData.duration && (
-                        <div
-                          className="arrow-message fade-apear"
-                          ref={refNote1}
-                          style={{
-                            position: "absolute",
-                            right: -45,
-                            top: 80,
-                            zIndex: 3,
-                          }}
-                        >
-                          <div style={{ position: "relative" }}>
-                            <div
-                              style={{
-                                position: "absolute",
-                                right: 0,
-                                bottom: "0px",
-                                rotate: "20deg",
-                              }}
-                            >
-                              <Icon
-                                path={
-                                  <g>
-                                    <path
-                                      d={arrow1_1}
-                                      strokeWidth={5}
-                                      stroke="currentColor"
-                                      className="arrow1"
-                                    />
-                                    <path
-                                      d={arrow1_2}
-                                      strokeWidth={5}
-                                      stroke="currentColor"
-                                      className="arrow2"
-                                    />
-                                  </g>
-                                }
-                                style={{
-                                  width: 80,
-                                  color: colors.arrow,
-                                }}
-                                props={{
-                                  fill: "none",
-                                  viewBox: "0 0 100 100",
-                                }}
-                              />
-                            </div>
-                            <Container
-                              template="inner"
-                              containerSize="compact"
-                              props={{
-                                style: {
-                                  position: "absolute",
-                                  backgroundColor: colors.arrow,
-                                  left: -50,
-                                  bottom: 50,
-                                  padding: 16,
-                                  minWidth: 160,
-                                  rotate: "10deg",
-                                },
-                              }}
-                            >
-                              <Typography style={{ color: colors.primary }}>
-                                вистави не тривають 0 хв! 🙄 🕓
-                              </Typography>
-                            </Container>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </Space>
-                  <Space size={0}>
-
-                    {/* Genre */}
-                    <Typography style={{ color: colors["primary-txt"] + "99" }}>
-                      Жанр:
-                    </Typography>
-                    <Select
-                      placeholder="тикни тут"
-                      className="select-edit"
-                      suffixIcon={false}
-                      popupMatchSelectWidth={false}
-                      options={
-                        genres
-                          ? genres.map((genre) => ({
-                            value: genre.genre_id,
-                            label: <Typography>{genre.name}</Typography>,
-                          }))
-                          : [
-                            typeof data.genre == "number"
-                              ? {
-                                value: data.genre,
-                                label: (
-                                  <Typography>{data.genre}</Typography>
-                                ),
-                              }
-                              : {
-                                value: data.genre.genre_id,
-                                label: (
-                                  <Typography>{data.genre.name}</Typography>
-                                ),
-                              },
-                          ]
-                      }
-                      value={
-                        typeof data.genre == "number"
-                          ? data.genre
-                          : data.genre.genre_id
-                      }
-                      onChange={(v) => {
-                        if (typeof data.genre == "number") {
-                          changeField(v, "genre", setData);
-                        } else if (genres) {
-                          changeField(
-                            genres.filter((g) => g.genre_id == v)[0],
-                            "genre",
-                            setData
-                          );
-                        }
-                      }}
-                      variant="borderless"
-                      style={{
-                        width: "fit-content",
-                        padding: 0,
-                      }}
-                    />
-                  </Space>
-
-                  <Space size={0} style={{ alignItems: "start" }}>
-                    <div
-                      style={{
-                        alignItems: "start",
-                        display: "inline-flex",
-                        flexDirection: "column",
-                      }}
-                    >
-                      <Typography
-                        style={{
-                          wordBreak: "revert",
-                          color: colors["primary-txt"] + "99",
-                        }}
-                      >
-                        Актори:
-                      </Typography>
-                      <Select
-                        placeholder="тикни тут"
-                        popupMatchSelectWidth={false}
-                        menuItemSelectedIcon={false}
-                        showSearch={false}
-                        suffixIcon={null}
-                        variant="borderless"
-                        mode="multiple"
-                        options={actors.map((a) => ({
-                          value: a.actor_id,
-                          label: (
-                            <Typography style={{ width: "max-content" }}>
-                              {a.name}
-                            </Typography>
-                          ),
-                        }))}
-                        value={
-                          data.actors.length > 0
-                            ? typeof data.actors[0] == "number"
-                              ? (data.actors as number[])
-                              : data.actors.map((a) => (a as Actor).actor_id)
-                            : []
-                        }
-                        onChange={(ids) => {
-                          if (
-                            data.actors.length > 0 &&
-                            typeof data.actors[0] == "number"
-                          ) {
-                            changeField(ids, "actors", setData);
-                          } else {
-                            changeField(
-                              actors.filter(
-                                (a) => !ids.every((id) => id != a.actor_id)
-                              ),
-                              "actors",
-                              setData
-                            );
-                          }
-                        }}
-                        style={{
-                          width: 200,
-                          padding: 0,
-                        }}
-                        styles={{ popup: { root: { width: "fit-content" } } }}
-                      />
-                    </div>
-
-                    <div
-                      style={{
-                        alignItems: "start",
-                        display: "inline-flex",
-                        flexDirection: "column",
-                      }}
-                    >
-                      <Typography
-                        style={{
-                          wordBreak: "revert",
-                          color: colors["primary-txt"] + "99",
-                        }}
-                      >
-                        Продюсери:
-                      </Typography>
-                      <Select
-                        placeholder="тикни тут"
-                        popupMatchSelectWidth={false}
-                        menuItemSelectedIcon={false}
-                        showSearch={false}
-                        suffixIcon={null}
-                        variant="borderless"
-                        mode="multiple"
-                        options={directors.map((d) => ({
-                          value: d.director_id,
-                          label: (
-                            <Typography style={{ width: "max-content" }}>
-                              {d.name}
-                            </Typography>
-                          ),
-                        }))}
-                        value={
-                          data.directors.length > 0
-                            ? typeof data.directors[0] == "number"
-                              ? (data.directors as number[])
-                              : data.directors.map(
-                                (a) => (a as Director).director_id
-                              )
-                            : []
-                        }
-                        onChange={(ids: number[]) => {
-                          if (
-                            data.directors.length > 0 &&
-                            typeof data.directors[0] == "number"
-                          ) {
-                            changeField(ids, "directors", setData);
-                          } else {
-                            changeField(
-                              directors.filter(
-                                (a) => !ids.every((id) => id != a.director_id)
-                              ),
-                              "directors",
-                              setData
-                            );
-                          }
-                        }}
-                        style={{
-                          width: 200,
-                          padding: 0,
-                        }}
-                        styles={{ popup: { root: { width: "fit-content" } } }}
-                      />
-                    </div>
-                  </Space>
-                </Space>
-                {/* ОПИС */}
-                <EditableField
-                  textarea={{
-                    placeholder: "хмм.. А про що це?",
-                    value: data.description,
-                    onChange: (v) =>
-                      changeField(
-                        v.currentTarget.value,
-                        "description",
-                        setData
-                      ),
-                  }}
-                />
-                {data &&
-                  boolData &&
-                  !checkSame(data, lastSavedData) &&
-                  checkValidation(boolData) && (
-                    <Space
-                      ref={buttonRef}
-                      style={{ width: "100%", justifyContent: "center" }}
-                    >
-                      <Button
-                        className="fade-apear"
-                        color="pink"
-                        variant="solid"
-                        shape="round"
-                        onClick={() => saveBtn.action(data, setLastSavedData)}
-                      >
-                        {saveBtn.text}
-                      </Button>
                     </Space>
-                  )}
-                <Space>
-                  <FloatingButton
-                    style={{
-                      fontSize: 24,
-                      color: colors["primary-txt"] + "79",
-                    }}
-                    inContainer
-                    Icon={DeleteFilled}
-                    onClick={() => changeField(null, "image", setData)}
-                    props={{ className: "animated-icon-self-accent" }}
-                  />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-
-                      setData((prev) => {
-                        if (!prev) return prev;
-
-                        return {
-                          ...prev,
-                          image: file,
-                        };
-                      });
-                    }}
-                  />
-                </Space>
-              </Space>
-            </>
-          ) : null}
-        </Container>
+                  </Space>
+                </>
+              ) : null}
+            </Container>
+          </div>
+        </Tooltip>
       </Container>
     </>
   );

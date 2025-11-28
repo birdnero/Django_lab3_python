@@ -11,19 +11,21 @@ const PlayCreatePage = () => {
         <CRUDPlayPage
             saveBtn={{
                 text: "Зберегти зміни",
-                action: (data, _) => {
+                action: (data, _, setData) => {
                     if (!data) return;
                     const formData = formPlayData(data)
 
                     postQuery(`api/plays/`, formData).then((r) =>
                         r
                             ?
-                            messageApi?.success("успішно створено!", 0.5)
-                            : messageApi?.error("щось пішло не так(", 0.5)
+                            (messageApi?.success("успішно створено!", 0.5), setData(EmptyPlay), 0)
+                            : (messageApi?.error("щось пішло не так(", 0.5), 0)
                     );
                 },
             }}
-            setInitalData={() => Promise.resolve(EmptyPlay)}
+            setInitalData={() => Promise.resolve((EmptyPlay))}
+            tooltip={false}
+            warnUnsaved={false}
         />
     </>
 }
