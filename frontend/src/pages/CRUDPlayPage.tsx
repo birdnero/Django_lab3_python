@@ -3,10 +3,10 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { deleteQuery, getQuery } from "../utils/RestUtils";
 import { type Actor, type Director, type Genre, type Play } from "../utils/ApiDtos";
-import { Button, Popover, Select, Space, Tooltip, Typography } from "antd";
+import { Button, Popover, Select, Space, Tooltip, Typography, Upload } from "antd";
 import { FloatingButton } from "../components/FloatingButton";
 import { colors } from "../config";
-import { ClockCircleOutlined, DeleteFilled, LeftCircleFilled, UndoOutlined } from "@ant-design/icons";
+import { ClockCircleOutlined, DeleteFilled, FileImageFilled, LeftCircleFilled, UndoOutlined } from "@ant-design/icons";
 import { changeField, changeTime, checkSame } from "../utils/HookFolders";
 import EditableField from "../components/EditableField";
 import { Container } from "../components/Containers";
@@ -104,6 +104,7 @@ const CRUDPlayPage: React.FC<CRUDPageProps<Play>> = ({
   const [actors, setActors] = useState<Actor[]>([]);
   const [directors, setDirectors] = useState<Director[]>([]);
   const [correctnessWarningTxt, setCorrectnessWarningTxt] = useState<ReactNode | string>("");
+  const [filePopover, setFilePopover] = useState(false);
 
   const scope = useRef<Scope>(null);
   const refScope = useRef<HTMLDivElement>(null);
@@ -328,6 +329,61 @@ const CRUDPlayPage: React.FC<CRUDPageProps<Play>> = ({
                       top: 12,
                     }}
                   >
+                    <Popover
+                      open={filePopover}
+                      onOpenChange={(v) => setFilePopover(v)}
+                      styles={{ body: { borderRadius: 16 } }}
+                      trigger="click"
+                      content={<Space direction="vertical" size="small">
+                        <Upload
+
+                          maxCount={1}
+                          disabled={(data.image != "" && data.image != null)}
+                          onRemove={() => changeField(null, "image", setData)}
+                          beforeUpload={() => false}
+                          accept="image/**"
+                          onChange={({ file }) => {
+                            console.log(file);
+
+                            if (file.status != "done" || !file || !file.originFileObj) return;
+                            console.log(file);
+
+                            const readFile = file.originFileObj as File;
+
+                            changeField(readFile, "image", setData)
+                            console.log(data);
+
+                          }}
+                        >
+                          <Button
+                            style={{ backgroundColor: colors.primary }}
+                            variant="filled"
+                            type="link"
+                            shape="round"
+                            color="pink">
+                            додати фото
+                          </Button>
+                        </Upload>
+                      </Space>}><div>
+
+                        <Tooltip open={filePopover ? false : undefined} trigger={"hover"} title={<Typography style={{ color: colors.primary, cursor: "default" }}>дії з фото</Typography>}>
+                          <div>
+                            <FloatingButton
+                              inContainer
+                              Icon={FileImageFilled}
+                              onClick={() => { }}
+                              style={{
+                                fontSize: 24,
+                                color: colors["primary-txt"] + "79",
+                                display: "none"
+                              }}
+                              props={{ className: "animated-icon-self-accent" }}
+                            >
+                            </FloatingButton>
+                          </div>
+                        </Tooltip>
+                      </div>
+                    </Popover>
                     {actions?.includes("undo") && !checkSame(data, lastSavedData) && (
                       <FloatingButton
                         style={{
@@ -824,7 +880,7 @@ const CRUDPlayPage: React.FC<CRUDPageProps<Play>> = ({
             </Container>
           </div>
         </Tooltip>
-      </Container>
+      </Container >
     </>
   );
 };
