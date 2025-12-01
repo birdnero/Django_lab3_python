@@ -2,7 +2,7 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import type { Play } from "../utils/ApiDtos";
 import { getQuery } from "../utils/RestUtils";
-import { Skeleton, Space, Typography } from "antd";
+import { Select, Skeleton, Space, Typography } from "antd";
 import { colors } from "../config";
 import { FloatingButton } from "../components/FloatingButton";
 import PlayLink from "../components/PlayLink";
@@ -14,20 +14,41 @@ import {
 import { useNavigate } from "react-router-dom";
 import { FloatingContainer } from "../components/FloatingContainer";
 import { Container } from "../components/Containers";
+import { type Genre } from "../utils/ApiDtos";
+const { Option } = Select;
 
 const PlaysPage: React.FC = () => {
   const [data, setData] = useState<Play[]>([]);
   const [nextPage, setNextPage] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [genreFilter, setGenreFilter] = useState<string | null>(null);
+  const [genres, setGenres] = useState<Genre[]>([]);
   const navigate = useNavigate();
+  const limit = 10;
+
+  const fetchPlays = (url?: string) => {
+    setLoading(true);
+    let apiUrl = url ?? `/api/plays/?limit=${limit}&_=${Date.now()}`;
+
+    getQuery(apiUrl).then((e: any) => {
+      if (!e) return;
+      setData(e.results);
+      setNextPage(e.next);
+      setLoading(false);
+    });
+  };
 
   useEffect(() => {
-    getQuery(`api/plays/?limit=20&_=${Date.now()}`).then((e: any) => {
+    getQuery(`api/plays/?limit=${limit}&_=${Date.now()}`).then((e: any) => {
       if (e !== null) {
         setData(e.results);
         setNextPage(e.next);
         setLoading(false);
       }
+    });
+    getQuery(`api/genres`).then((e) => {
+      if (e) setGenres(e as Genre[]);
+      console.log(e);
     });
   }, []);
 
@@ -87,6 +108,32 @@ const PlaysPage: React.FC = () => {
             },
           }}
         >
+          <Select
+            value={genreFilter}
+            placeholder="Select genre"
+            style={{
+              width: "auto",
+              minWidth: 100,
+            }}
+            onChange={(value) => {
+              setGenreFilter(value);
+
+              const url =
+                value && value.length > 0
+                  ? `/api/plays/?genre_name=${value}&limit=${limit}&_=${Date.now()}`
+                  : `/api/plays/?limit=${limit}&_=${Date.now()}`;
+
+              fetchPlays(url);
+            }}
+            allowClear
+          >
+            {genres.map((g) => (
+              <Option key={g.genre_id} value={g.name}>
+                {g.name}
+              </Option>
+            ))}
+          </Select>
+
           {data.length > 0 &&
             data.map((play) => <PlayLink key={play.play_id} play={play} />)}
 
