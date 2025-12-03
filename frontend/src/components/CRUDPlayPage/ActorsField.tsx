@@ -5,26 +5,26 @@ import { getQuery } from "../../utils/RestUtils";
 import type { Actor, Play } from "../../utils/ApiDtos";
 import { usePlayState } from "../../utils/StateManager";
 import { useDebouncedUpdate } from "./NameField";
-import { objA2numA } from "../../pages/CRUDPlayPage";
+import { objA2numA } from "../../utils/FormPlayData";
 
 const ActorsField: React.FC = () => {
     const [_actors, _setActors] = useState<Actor[]>([]);
     const changeField = usePlayState(s => s.changeFiled)
-        const setChanged = usePlayState(s => s.setChanged)
-    
-        const actors = usePlayState(s => s.data?.actors)
-        const lastSaved = usePlayState(s => s.savedData?.actors)
-        const [localValue, setLocalValue] = useState(actors ?? []);
-    
-    
-        const debouncedUpdateGlobal = useDebouncedUpdate((value: Play["actors"]) => {
-            changeField("actors", value);
-            setChanged("actors", value !== lastSaved);
-        });
-    
-        useEffect(() => {
-            if (actors !== localValue) setLocalValue(actors ?? []);
-        }, [actors]);
+    const setChanged = usePlayState(s => s.setChanged)
+
+    const actors = usePlayState(s => s.data?.actors)
+    const lastSaved = usePlayState(s => s.savedData?.actors)
+    const [localValue, setLocalValue] = useState(actors ?? []);
+
+
+    const debouncedUpdateGlobal = useDebouncedUpdate((value: Play["actors"]) => {
+        changeField("actors", value);
+        setChanged("actors", value !== lastSaved);
+    });
+
+    useEffect(() => {
+        if (actors !== localValue) setLocalValue(actors ?? []);
+    }, [actors]);
 
     useEffect(() => {
         getQuery("api/actors").then((e) => {
@@ -57,11 +57,11 @@ const ActorsField: React.FC = () => {
                 variant="borderless"
                 mode="multiple"
                 value={objA2numA(localValue, "actor_id")}
-                onChange={v=>{
+                onChange={v => {
                     setLocalValue(v)
                     debouncedUpdateGlobal(v)
                 }}
-                style={{width: "min-content", padding: 0 }}
+                style={{ width: "min-content", padding: 0 }}
                 styles={{ popup: { root: { width: "fit-content" } } }}
             >
                 {_actors.map(a => (

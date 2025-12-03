@@ -1,9 +1,10 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { getQuery, putQuery } from "../utils/RestUtils";
 import { useMessage, usePlayState } from "../utils/StateManager";
-import CRUDPlayPage, { formPlayData } from "./CRUDPlayPage"
+import CRUDPlayPage from "./CRUDPlayPage"
 import type { Play } from "../utils/ApiDtos";
 import { useEffect } from "react";
+import { formPlayData } from "../utils/FormPlayData";
 
 
 const PlayPage = () => {

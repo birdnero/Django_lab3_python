@@ -5,7 +5,7 @@ import { getQuery } from "../../utils/RestUtils";
 import { type Director, type Play } from "../../utils/ApiDtos";
 import { usePlayState } from "../../utils/StateManager";
 import { useDebouncedUpdate } from "./NameField";
-import { objA2numA } from "../../pages/CRUDPlayPage";
+import { objA2numA } from "../../utils/FormPlayData";
 
 const DirectosField: React.FC = () => {
     const [_directors, _setDirectors] = useState<Director[]>([]);

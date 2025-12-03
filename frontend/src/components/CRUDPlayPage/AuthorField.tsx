@@ -1,7 +1,7 @@
 import { Space, Typography } from "antd";
 import EditableField from "../EditableField";
 import { colors } from "../../config";
-import { PlayArrowMessageAuthorWarning } from "../PlayArrows";
+import { PlayArrowMessageAuthorWarning } from "./PlayArrows";
 import type { ArrowMessageProps } from "../ArrowMessage";
 import { usePlayState } from "../../utils/StateManager";
 import { useEffect, useState } from "react";

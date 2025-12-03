@@ -2,7 +2,7 @@ import { ClockCircleOutlined } from "@ant-design/icons";
 import EditableField from "../EditableField";
 import { colors } from "../../config";
 import type { ArrowMessageProps } from "../ArrowMessage";
-import { PlayArrowMessageTimeWarning } from "../PlayArrows";
+import { PlayArrowMessageTimeWarning } from "./PlayArrows";
 import { duration2str, str2duration } from "../../utils/DurationUtils";
 import { Space } from "antd";
 import { usePlayState } from "../../utils/StateManager";

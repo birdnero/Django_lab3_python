@@ -1,7 +1,7 @@
 import type { MessageInstance } from "antd/es/message/interface";
 import { create } from "zustand";
-import { checkInvalid, EmptyPlay, type Play } from "./ApiDtos";
-import { checkAllFilled, checkSame } from "./HookFolders";
+import { EmptyPlay, type Play } from "./ApiDtos";
+import { checkAllFilled } from "./HookFolders";
 
 type MessageStateT = {
     messageApi: null | MessageInstance;
@@ -38,7 +38,7 @@ export const useToken = create<TokenStateT>(set => ({
 export const useInFirst = create<InFirstT>(set => ({
     inFirst: (() => localStorage.getItem("un-first") ?? "")(),
     setChecked: () => {
-        localStorage.setItem("access-token", "checked")
+        localStorage.setItem("un-first", "checked")
         set({ inFirst: "no" })
     }
 }))
@@ -81,6 +81,9 @@ export const usePlayState = create<PlayStateT>((set, get) => ({
         set((state) => {
             if (!state.data) return state;
             const newData = { ...state.data, [field]: value }
+            const saved = get().savedData
+            if (saved && saved[field] != value)
+                get().setChanged(field, true)
             return { data: newData }
         })
     },

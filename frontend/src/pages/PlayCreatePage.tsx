@@ -2,7 +2,8 @@ import { useEffect } from "react";
 import { EmptyPlay } from "../utils/ApiDtos";
 import { postQuery } from "../utils/RestUtils";
 import { useMessage, usePlayState } from "../utils/StateManager";
-import CRUDPlayPage, { formPlayData } from "./CRUDPlayPage"
+import CRUDPlayPage from "./CRUDPlayPage"
+import { formPlayData } from "../utils/FormPlayData";
 
 
 const PlayCreatePage = () => {

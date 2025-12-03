@@ -5,7 +5,7 @@ import { getQuery } from "../../utils/RestUtils";
 import { checkInvalid, type Genre, type Play } from "../../utils/ApiDtos";
 import { usePlayState } from "../../utils/StateManager";
 import { useDebouncedUpdate } from "./NameField";
-import { obj2num } from "../../pages/CRUDPlayPage";
+import { obj2num } from "../../utils/FormPlayData";
 
 const GenreField: React.FC = () => {
     const [genres, setGenres] = useState<Genre[]>([]);

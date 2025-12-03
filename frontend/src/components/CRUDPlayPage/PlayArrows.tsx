@@ -1,8 +1,8 @@
-import ArrowMessage, { type ArrowMessageProps } from "./ArrowMessage"
-import { arrow1_1, arrow1_2, arrow2_1, arrow2_2, arrow3_1, arrow3_2 } from "../utils/IconPaths"
+import ArrowMessage, { type ArrowMessageProps } from "../ArrowMessage"
+import { arrow1_1, arrow1_2, arrow2_1, arrow2_2, arrow3_1, arrow3_2 } from "../../utils/IconPaths"
 import { Typography } from "antd"
-import { colors } from "../config"
-import { usePlayState } from "../utils/StateManager"
+import { colors } from "../../config"
+import { usePlayState } from "../../utils/StateManager"
 import { useEffect, useState, type ReactNode } from "react"
 
 
