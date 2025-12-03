@@ -2,19 +2,33 @@ import { Typography, Select } from "antd";
 import { useEffect, useState } from "react";
 import { colors } from "../../config";
 import { getQuery } from "../../utils/RestUtils";
-import type { Actor } from "../../utils/ApiDtos";
+import type { Actor, Play } from "../../utils/ApiDtos";
+import { usePlayState } from "../../utils/StateManager";
+import { useDebouncedUpdate } from "./NameField";
+import { objA2numA } from "../../pages/CRUDPlayPage";
 
-interface ActorsFieldProps {
-    value: number[];               // масив id акторів
-    onChange: (ids: number[]) => void;
-}
-
-const ActorsField: React.FC<ActorsFieldProps> = ({ value, onChange }) => {
-    const [actors, setActors] = useState<Actor[]>([]);
+const ActorsField: React.FC = () => {
+    const [_actors, _setActors] = useState<Actor[]>([]);
+    const changeField = usePlayState(s => s.changeFiled)
+        const setChanged = usePlayState(s => s.setChanged)
+    
+        const actors = usePlayState(s => s.data?.actors)
+        const lastSaved = usePlayState(s => s.savedData?.actors)
+        const [localValue, setLocalValue] = useState(actors ?? []);
+    
+    
+        const debouncedUpdateGlobal = useDebouncedUpdate((value: Play["actors"]) => {
+            changeField("actors", value);
+            setChanged("actors", value !== lastSaved);
+        });
+    
+        useEffect(() => {
+            if (actors !== localValue) setLocalValue(actors ?? []);
+        }, [actors]);
 
     useEffect(() => {
         getQuery("api/actors").then((e) => {
-            if (e) setActors(e as Actor[]);
+            if (e) _setActors(e as Actor[]);
         });
     }, []);
 
@@ -42,12 +56,15 @@ const ActorsField: React.FC<ActorsFieldProps> = ({ value, onChange }) => {
                 suffixIcon={null}
                 variant="borderless"
                 mode="multiple"
-                value={value}
-                onChange={onChange}
+                value={objA2numA(localValue, "actor_id")}
+                onChange={v=>{
+                    setLocalValue(v)
+                    debouncedUpdateGlobal(v)
+                }}
                 style={{width: "min-content", padding: 0 }}
                 styles={{ popup: { root: { width: "fit-content" } } }}
             >
-                {actors.map(a => (
+                {_actors.map(a => (
                     <Select.Option key={a.actor_id} value={a.actor_id}>
                         <Typography style={{ width: "max-content" }}>
                             {a.name}

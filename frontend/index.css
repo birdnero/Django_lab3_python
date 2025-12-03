@@ -138,3 +138,10 @@ input:-webkit-autofill {
 .ant-select-selection-item:hover .ant-select-selection-item-remove{
   display: inline-flex !important;
 }
+
+.grid-auto {
+  display: grid;
+  grid-template-columns: repeat(2, max-content); /* кількість колонок */
+  grid-auto-rows: max-content;
+  gap: 4px 16px; /* рядок, колонка */
+}

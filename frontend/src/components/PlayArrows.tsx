@@ -2,13 +2,34 @@ import ArrowMessage, { type ArrowMessageProps } from "./ArrowMessage"
 import { arrow1_1, arrow1_2, arrow2_1, arrow2_2, arrow3_1, arrow3_2 } from "../utils/IconPaths"
 import { Typography } from "antd"
 import { colors } from "../config"
+import { usePlayState } from "../utils/StateManager"
+import { useEffect, useState, type ReactNode } from "react"
 
 
 export const PlayArrowMessageGeneralWarning = ({
-    refScope, message
-}: Pick<ArrowMessageProps, "refScope" | "message">) => {
+    refScope
+}: Pick<ArrowMessageProps, "refScope">) => {
+    const getFieldID = usePlayState(s => s.getFieldID)
+    let [nameID, descriptionID, genreID] = [2 ** getFieldID("name"), 2 ** getFieldID("description"), 2 ** getFieldID("genre")]
+    const valid = usePlayState(s => s.valid)
+    const [message, setMessage] = useState<ReactNode>("")
+    const [active, setActive] = useState<boolean>(false)
 
-    return <ArrowMessage
+    useEffect(() => {
+        const newMessage: String[] = []
+        if (valid & nameID)
+            newMessage.push("А де назва? еееей!!? 🤬")
+        if (valid & descriptionID)
+            newMessage.push("ти бачив? там в низу опис є...")
+        if (valid & genreID)
+            newMessage.push("кстаті вистав жанр мають щавжди😊😊")
+
+        setActive(((nameID + genreID + descriptionID) & valid) > 0)
+        setMessage(newMessage.map((el, i) => <Typography style={{ color: colors.primary }} children={el} key={i} />))
+    }, [valid])
+
+
+    return active && <ArrowMessage
         refScope={refScope}
         fullElementProp={{ style: { left: 0, top: 0, right: 250 } }}
         fullArrowProp={{ style: { right: 0, bottom: 0, rotate: "25deg" } }}

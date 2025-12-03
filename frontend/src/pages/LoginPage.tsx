@@ -49,12 +49,12 @@ const LoginPage: React.FC = () => {
     const [loading, setloading] = useState<boolean>(false)
     const [messageApi, contextHolder] = message.useMessage();
     const setToken = useToken(s => s.setToken)
-    const navigate = useNavigate()
     const scope = useRef<Scope>(null)
     const refScope = useRef<HTMLDivElement>(null)
     const containerRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLDivElement>(null);
 
+    const navigate = useNavigate()
 
     const loginMe = (e: React.FormEvent<HTMLFormElement>) => {
         setloading(true)
@@ -64,11 +64,11 @@ const LoginPage: React.FC = () => {
             formData.append("email", data.email);
             formData.append("password", data.password);
 
-
             postQuery(`login/`, formData).then(r => {
                 const success = (r: { access: string }) => {
                     setToken(r.access)
-                    messageApi.success("succesfully saved!", 1).then(() => window.history.length > 1 ? navigate(-1) : navigate("/"))
+
+                    messageApi.success("succesfully saved!", 1).then(() => navigate("/"));
                 }
 
                 r ? success(r as { access: string }) : messageApi.error("error ocurred", 0.5).then(() => setloading(false))

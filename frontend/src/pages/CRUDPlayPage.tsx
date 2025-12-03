@@ -23,10 +23,16 @@ import ActionButton from "../components/CRUDPlayPage/ActionButton";
 
 
 //? independent features >>>>
-const objA2numA = <T,>(arr: T[] | number[], idField: string): number[] => {
+export const objA2numA = <T,>(arr: T[] | number[], idField: keyof T): number[] => {
   if (arr.length > 0 && typeof arr[0] !== "number")
     return arr.map((o) => (o as T)[idField as keyof T] as number);
   return arr as number[];
+};
+
+export const obj2num = <T,>(el: T | number, idField: keyof T): number => {
+  if (typeof el !== "number")
+    return (el as T)[idField as keyof T] as number;
+  return el as number;
 };
 
 type boolObj<T> = {
@@ -41,11 +47,10 @@ interface CRUDPageProps<T> {
   // кнопка яка появляється, при зміні даних, якщо вони відповідають правилам валідації
   saveBtn: {
     text: string,
-    action: (data: T | null, setLastSavedData: React.Dispatch<React.SetStateAction<T | null>>, setData: React.Dispatch<React.SetStateAction<T | null>>) => any
+    action: () => any
   },
   // кнопки доступних дій (згори)
   actions?: CRUDPageActionsT[],
-  setInitalData: (id?: string) => Promise<T | null>,
   tooltip?: boolean,
   warnUnsaved?: boolean,
 }
@@ -61,10 +66,8 @@ export const formPlayData = (data: Play): FormData => {
   formData.append("author", data.author);
   formData.append("description", data.description);
   formData.append("duration", data.duration.toString());
+  formData.append("genre_id", obj2num<Genre>(data.genre ?? 0, "genre_id").toString())
 
-  objA2numA([data.genre], "genre_id").map((g) =>
-    formData.append("genre_id", g.toString())
-  );
 
   objA2numA(data.actors, "actor_id").forEach((id) =>
     formData.append("actor_ids", id.toString())
@@ -91,29 +94,26 @@ export const formPlayData = (data: Play): FormData => {
 const CRUDPlayPage: React.FC<CRUDPageProps<Play>> = ({
   saveBtn,
   actions,
-  setInitalData,
   tooltip = true,
   warnUnsaved = true,
 }) => {
-  const params = useParams<{ playid: string }>();
   const messageApi = useMessage((s) => s.messageApi);
   const inFirst = useInFirst((s) => s.inFirst);
   const setChecked = useInFirst((s) => s.setChecked);
   const navigate = useNavigate();
+  const refScope = useRef<HTMLDivElement>(null);
 
   const [filePopover, setFilePopover] = useState(false);
 
 
   const data = usePlayState(s => s.data)
-  const lastSaved = usePlayState(s => s.savedData)
   const valid = usePlayState(s => s.isValid)
+  const realvalid = usePlayState(s => s.valid)
   const changed = usePlayState(s => s.isChanged)
 
 
-  const setInitial = usePlayState(s => s.init)
   const undo = usePlayState(s => s.undo)
 
-  const refScope = useRef<HTMLDivElement>(null);
 
   const handleDelete = (id: number) =>
     deleteQuery(`api/plays/${id}/`).then((r) =>
@@ -122,35 +122,6 @@ const CRUDPlayPage: React.FC<CRUDPageProps<Play>> = ({
         : messageApi?.error("щось пішло не так(", 0.5)
     );
 
-
-  const play2validationObj = (data?: Play): boolObj<Play> => {
-    if (!data) return {};
-
-    return {
-      name: data.name.trim() !== "",
-      author: data.author.trim() !== "",
-      description: data.description.trim() !== "",
-      genre: data.genre != 0,
-      duration: data.duration > 0,
-    };
-  };
-
-
-  const getTextForCorrectnessWarning = (boolData?: boolObj<Play>) => {
-    if (!boolData) return <></>;
-
-    return <>
-      {!boolData.name && <Typography style={{ color: colors.primary }}>
-        А де назва? еееей!!? 🤬
-      </Typography>}
-      {!boolData.description && <Typography style={{ color: colors.primary }}>
-        ти бачив? там в низу опис є...
-      </Typography>}
-      {!boolData.genre && <Typography style={{ color: colors.primary }}>
-        кстаті вистав жанр мають щавжди😊😊
-      </Typography>}
-    </>
-  };
 
   useEffect(() => {
     if (warnUnsaved) {
@@ -165,17 +136,10 @@ const CRUDPlayPage: React.FC<CRUDPageProps<Play>> = ({
     }
   }, [data])
 
-
-  useEffect(() => {
-    setInitalData(params.playid).then((e) => {
-      if (e) {
-        setInitial(e);        
-        
-      } else {
-        navigate("/error");
-      }
-    });
-  }, [params.playid, navigate, setInitial]);
+  useEffect(()=>{
+    console.log(realvalid, "and", valid);
+    
+  }, [realvalid])
 
   return (
     <>
@@ -205,9 +169,7 @@ const CRUDPlayPage: React.FC<CRUDPageProps<Play>> = ({
               containerSize="compact"
               props={{ style: { paddingTop: 16, position: "relative" } }}
             >
-              {/* TODO */}
-              {/* {data &&
-                (!boolData.name || !boolData.genre || !boolData.description) && <PlayArrowMessageGeneralWarning refScope={refScope} message={correctnessWarningTxt} />} */}
+              <PlayArrowMessageGeneralWarning refScope={refScope} />
               {data ? (
                 <>
                   {/* TOP BAR BUTTONS (INSIDE THE CONTAINER/NEAR DELETE) */}
@@ -273,7 +235,7 @@ const CRUDPlayPage: React.FC<CRUDPageProps<Play>> = ({
                         </Tooltip>
                       </div>
                     </Popover>
-                    {actions?.includes("undo") && (
+                    {actions?.includes("undo") && changed && (
                       <FloatingButton
                         style={{
                           fontSize: 24,
@@ -314,29 +276,17 @@ const CRUDPlayPage: React.FC<CRUDPageProps<Play>> = ({
                       </Popover>}
                   </FloatingContainer>
                   <NameField />
-                  <Space
-                    direction="vertical"
-                    size="middle"
-                    style={{ width: "100%" }}
-                  >
-                    <Space size={0} direction="vertical">
-                      <Space size="middle" style={{ alignItems: "start" }}>
-                        <AuthorField refScope={refScope} />
-                        <DurationField refScope={refScope} />
-                      </Space>
-                      {/* TODO */}
-                      {/* <GenreField /> */}
-                      <Space size={0} style={{ alignItems: "start" }}>
-                        {/* TODO */}
-                        {/* <ActorsField /> */}
-                        {/* TODO */}
-                        {/* <DirectosField /> */}
-                      </Space>
-                    </Space>
-                    {/* TODO */}
-                    {/* <DescriptionField /> */}
-                    {/* TODO */}
-                    {/* <ActionButton onClick={() => ""} text={saveBtn.text} /> */}
+                  <Space direction="vertical" size="middle" style={{ width: "100%", justifyContent: "start" }} >
+                    <div className="grid-auto" >
+                      <AuthorField refScope={refScope} />
+                      <DurationField refScope={refScope} />
+                      <GenreField />
+                      <div />
+                      <ActorsField />
+                      <DirectosField />
+                    </div>
+                    <DescriptionField />
+                    <ActionButton active={changed && !valid} onClick={saveBtn.action} text={saveBtn.text} />
 
                     {/* TODO: REPLACE TO NORMAL */}
                     <Space>

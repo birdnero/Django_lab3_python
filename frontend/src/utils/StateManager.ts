@@ -1,6 +1,7 @@
 import type { MessageInstance } from "antd/es/message/interface";
 import { create } from "zustand";
-import type { Play } from "./ApiDtos";
+import { checkInvalid, EmptyPlay, type Play } from "./ApiDtos";
+import { checkAllFilled, checkSame } from "./HookFolders";
 
 type MessageStateT = {
     messageApi: null | MessageInstance;
@@ -54,6 +55,7 @@ type PlayStateT = {
 
     savedData?: Play,
     undo: () => void,
+    save: () => void,
 
     isValid: boolean,
     isChanged: boolean,
@@ -63,15 +65,17 @@ type PlayStateT = {
 
     changed: number,
     setChanged: <K extends keyof Play>(filed: K, v: boolean) => void
+
+    getFieldID: <K extends keyof Play>(filed: K) => number
 }
 
-const playKeys = Object.keys({} as Play)
+const playKeys = Object.keys(EmptyPlay)
 export const usePlayState = create<PlayStateT>((set, get) => ({
     data: undefined,
     savedData: undefined,
     isValid: true,
     isChanged: false,
-    valid: -1,
+    valid: 0,
     changed: 0,
     changeFiled: (field, value) => {
         set((state) => {
@@ -80,11 +84,15 @@ export const usePlayState = create<PlayStateT>((set, get) => ({
             return { data: newData }
         })
     },
-    init: (p) => set({ data: p, savedData: p, valid: 0, changed: -1 }),
+    init: (p) => {
+        set({ data: p, savedData: p, valid: 0, changed: 0, isValid: !checkAllFilled(p, EmptyPlay, ["play_id", "image", "directors", "actors"]), isChanged: false })
+
+    },
     undo: () => {
         const saved = get().savedData;
-        set({ data: saved, changed: -1, valid: 0 });
+        set({ data: saved, changed: 0, isChanged: false, isValid: !checkAllFilled(saved ?? EmptyPlay, EmptyPlay, ["play_id", "image", "directors", "actors"]), valid: 0 });
     },
+    save: () => set({ savedData: get().data, changed: 0, isChanged: false }),
     setValid: (field, v) => {
         set((state) => {
             const i = playKeys.indexOf(field);
@@ -106,6 +114,7 @@ export const usePlayState = create<PlayStateT>((set, get) => ({
     setChanged: (field, v) => {
         set((state) => {
             const i = playKeys.indexOf(field);
+
             if (i === -1) return state;
             let mask = state.changed;
             if (mask === -1)
@@ -120,6 +129,8 @@ export const usePlayState = create<PlayStateT>((set, get) => ({
             return update;
         });
     },
+
+    getFieldID: field => playKeys.indexOf(field)
 }))
 
 

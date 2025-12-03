@@ -6,6 +6,7 @@ import type { ArrowMessageProps } from "../ArrowMessage";
 import { usePlayState } from "../../utils/StateManager";
 import { useEffect, useState } from "react";
 import { useDebouncedUpdate } from "./NameField";
+import { checkInvalid } from "../../utils/ApiDtos";
 
 const AuthorField: React.FC<Pick<ArrowMessageProps, "refScope">> = ({ refScope }) => {
     const changeField = usePlayState(s => s.changeFiled)
@@ -20,8 +21,8 @@ const AuthorField: React.FC<Pick<ArrowMessageProps, "refScope">> = ({ refScope }
     const debouncedUpdateGlobal = useDebouncedUpdate((value: string) => {
         changeField("author", value);
         setChanged("author", value !== lastSaved);
-        setValid("author", value !== "");
-    }, 400);
+        setValid("author", checkInvalid("author", value));
+    });
 
     useEffect(() => {
         if (author !== localValue) setLocalValue(author ?? "");

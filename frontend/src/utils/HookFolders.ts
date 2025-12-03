@@ -18,9 +18,9 @@ export const checkAllFilled = <T extends object>(V: T, emptyV: T, except?: strin
   });
 }
 
-export const checkSame = <T extends object>(V: T, emptyV: T, except?: string[]) => {
+export const checkSame = <T extends object, K extends keyof T>(V: T, emptyV: T, except?: K[]) => {
   return Object.keys(V).every(key => {
-    if (except?.includes(key)) return true
+    if (except?.includes(key as K)) return true
     return V[key as keyof T] == emptyV[key as keyof T];
   });
 }

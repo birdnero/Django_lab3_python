@@ -22,8 +22,8 @@ const DurationField: React.FC<Pick<ArrowMessageProps, "refScope">> = ({ refScope
     const debouncedUpdateGlobal = useDebouncedUpdate((time: number) => {
         changeField("duration", time ?? 0);
         setChanged("duration", time !== lastSaved);
-        setValid("duration", time > 0);
-    }, 400);
+        setValid("duration", time <= 0);
+    });
 
     useEffect(() => {
         if (duration !== str2duration(localValue)) setLocalValue(duration2str(duration ?? 0));

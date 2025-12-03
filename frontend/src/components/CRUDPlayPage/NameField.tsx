@@ -4,8 +4,9 @@ import { usePlayState } from "../../utils/StateManager";
 
 
 import { useRef, useMemo } from "react";
+import { checkInvalid } from "../../utils/ApiDtos";
 
-export function useDebouncedUpdate<T extends (...args: any[]) => void>(fn: T, delay: number) {
+export function useDebouncedUpdate<T extends (...args: any[]) => void>(fn: T, delay: number = 200) {
     const timer = useRef<number | null>(null);
 
     return useMemo(() => {
@@ -30,12 +31,11 @@ const NameField: React.FC = () => {
     const [localValue, setLocalValue] = useState(name ?? "");
 
 
-    // debounce на оновлення global data
     const debouncedUpdateGlobal = useDebouncedUpdate((value: string) => {
         changeField("name", value);
         setChanged("name", value !== lastSaved);
-        setValid("name", value !== "");
-    }, 400); // 400ms після зупинки вводу
+        setValid("name", checkInvalid("name", value));
+    })
 
     useEffect(() => {
         if (name !== localValue) setLocalValue(name ?? "");
