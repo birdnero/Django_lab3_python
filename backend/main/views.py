@@ -1,3 +1,4 @@
+from main.filter import PlayFilter
 from .repository.Repository import Repository
 from rest_framework import viewsets, status
 from rest_framework.response import Response
@@ -6,9 +7,15 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from .serializers import *
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.pagination import PageNumberPagination
+from django_filters.rest_framework import DjangoFilterBackend
 
 
-class BaseViewSet(viewsets.ViewSet):
+class DefaultPagination(PageNumberPagination):
+    # page_size = 10
+    page_size_query_param = "limit"
+
+class BaseViewSet(viewsets.GenericViewSet):
     repository = None
     serializer_class = None
     permission_classes = [IsAuthenticated]
@@ -54,6 +61,9 @@ class BaseViewSet(viewsets.ViewSet):
 class PlayViewSet(BaseViewSet):
     repository = Repository().plays
     serializer_class = PlaySerializer
+    pagination_class = DefaultPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = PlayFilter
 
     @swagger_auto_schema(request_body=serializer_class)
     def create(self, request):
@@ -62,6 +72,16 @@ class PlayViewSet(BaseViewSet):
     @swagger_auto_schema(request_body=serializer_class)
     def update(self, request, pk=None):
         return super().update(request, pk)
+    
+    def list(self, request):
+        objs = self.repository.get_all()
+        queryset = self.filter_queryset(objs)
+
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(queryset, request)
+
+        serializer = self.serializer_class(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
 
 class ActorViewSet(BaseViewSet):
