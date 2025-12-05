@@ -18,11 +18,11 @@ export const PlayArrowMessageGeneralWarning = ({
     useEffect(() => {
         const newMessage: String[] = []
         if (valid & nameID)
-            newMessage.push("А де назва? еееей!!? 🤬")
+            newMessage.push("Можливо треба додати назву?..")
         if (valid & descriptionID)
-            newMessage.push("ти бачив? там в низу опис є...")
+            newMessage.push("Думаю, опис не завадить")
         if (valid & genreID)
-            newMessage.push("кстаті вистав жанр мають щавжди😊😊")
+            newMessage.push("Тільки не вистава без жанру..")
 
         setActive(((nameID + genreID + descriptionID) & valid) > 0)
         setMessage(newMessage.map((el, i) => <Typography style={{ color: colors.primary }} children={el} key={i} />))
@@ -47,7 +47,6 @@ export const PlayArrowMessageGeneralWarning = ({
                     left: 140,
                     bottom: 70,
                     minWidth: 160,
-                    rotate: "-5deg",
                 }
             }
         }}
@@ -81,11 +80,11 @@ export const PlayArrowMessageTimeWarning = ({
         }}
         msgContainerProp={{
             props: {
-                style: { left: -50, bottom: 50, minWidth: 160, rotate: "10deg", width: undefined }
+                style: { left: -50, bottom: 50, minWidth: 160, width: undefined }
             }
         }}
         message={<Typography style={{ color: colors.primary }}>
-            вистави не тривають 0 хв! 🙄 🕓
+            Ви ж не хочете щоб вистава тривала 0 хвилин?
         </Typography>}
 
     />
@@ -109,11 +108,11 @@ export const PlayArrowMessageAuthorWarning = ({
         }}
         msgContainerProp={{
             props: {
-                style: { right: 20, bottom: 80, minWidth: 160, rotate: "10deg", width: undefined }
+                style: { right: 20, bottom: 70, minWidth: 160, width: undefined }
             }
         }}
         message={<Typography style={{ color: colors.primary }}>
-            а хто автор цього шедевру? 🤔🤔🤔
+            Автор трішки образиться за це..
         </Typography>}
 
     />
