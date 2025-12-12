@@ -1,5 +1,5 @@
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Play } from "../utils/ApiDtos";
 import { getQuery } from "../utils/RestUtils";
 import { Select, Skeleton, Space, Typography } from "antd";
@@ -9,13 +9,14 @@ import PlayLink from "../components/PlayLink";
 import {
   LeftCircleFilled,
   PlusCircleFilled,
-  RetweetOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { FloatingContainer } from "../components/FloatingContainer";
 import { Container } from "../components/Containers";
 import { type Genre } from "../utils/ApiDtos";
+import { useInView } from "react-cool-inview";
 const { Option } = Select;
+
 
 const PlaysPage: React.FC = () => {
   const [data, setData] = useState<Play[]>([]);
@@ -24,7 +25,18 @@ const PlaysPage: React.FC = () => {
   const [genreFilter, setGenreFilter] = useState<string | null>(null);
   const [genres, setGenres] = useState<Genre[]>([]);
   const navigate = useNavigate();
-  const limit = 10;
+  const limit = 30;
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const { observe } = useInView({
+    root: containerRef.current,
+    rootMargin: "0px 0px 0px 0px",
+    threshold: 0.1,
+    onEnter: ({ }) => {
+      console.log("Елемент став видимим!");
+      if (nextPage) loadNext()
+    },
+  });
 
   const fetchPlays = (url?: string) => {
     setLoading(true);
@@ -48,7 +60,6 @@ const PlaysPage: React.FC = () => {
     });
     getQuery(`api/genres`).then((e) => {
       if (e) setGenres(e as Genre[]);
-      console.log(e);
     });
   }, []);
 
@@ -67,6 +78,7 @@ const PlaysPage: React.FC = () => {
       setLoading(false);
     });
   };
+
 
   return (
     <>
@@ -91,14 +103,14 @@ const PlaysPage: React.FC = () => {
         <Typography.Title level={1}>All plays ever</Typography.Title>
 
         <Container
+          renderItem="div"
           template="inner"
           containerSize="compact"
           props={{
-            direction: "horizontal",
-            wrap: true,
-            size: "small",
             style: {
-              maxWidth: 720,
+              display: "inline-flex",
+              flexDirection: "column",
+              // gap: 8,
               marginBottom: 16,
               padding: 32,
               backgroundColor:
@@ -106,15 +118,11 @@ const PlaysPage: React.FC = () => {
                   ? "transparent"
                   : colors.secondary,
             },
+
           }}
         >
           <Select
             value={genreFilter}
-            placeholder="Select genre"
-            style={{
-              width: "auto",
-              minWidth: 100,
-            }}
             onChange={(value) => {
               setGenreFilter(value);
 
@@ -125,6 +133,15 @@ const PlaysPage: React.FC = () => {
 
               fetchPlays(url);
             }}
+
+            placeholder="обери жанр"
+            popupMatchSelectWidth={false}
+            menuItemSelectedIcon={false}
+            showSearch={false}
+            // suffixIcon={null}
+            variant="borderless"
+            style={{ width: "min-content", padding: 0 }}
+            styles={{ popup: { root: { width: "fit-content" } } }}
             allowClear
           >
             {genres.map((g) => (
@@ -134,8 +151,44 @@ const PlaysPage: React.FC = () => {
             ))}
           </Select>
 
-          {data.length > 0 &&
-            data.map((play) => <PlayLink key={play.play_id} play={play} />)}
+
+          {/* <div style={{ maxWidth: 300, , position: "relative", overflowY: "auto" }} className="hide-scroll"> */}
+
+          <div
+            className="hide-scroll"
+            ref={containerRef}
+            id="scroll-container"
+            style={{
+              maxWidth: 700,
+              maxHeight: 300,
+              scrollbarWidth: "none",
+              overflowY: "auto",
+              width: "100%",
+              paddingTop: "24px",
+              paddingBottom: "24px",
+              maskImage: data ? "linear-gradient(to bottom, transparent 0px, black 20px, black calc(100% - 20px), transparent 100%)" : undefined,
+              WebkitMaskImage: data ? "linear-gradient(to bottom, transparent 0px, black 20px, black calc(100% - 20px), transparent 100%)" : undefined,
+            }}
+          >
+            {data.map((play) => <PlayLink key={play.play_id} play={play} />)}
+
+            {!!nextPage && (
+              <Space
+                style={{
+                  paddingTop: 8,
+                  paddingLeft: 8
+                }}
+                size={8}
+                ref={observe}
+                direction="horizontal">
+                <Skeleton.Button active shape="round" size="default" />
+                <Skeleton.Button style={{ width: 90 }} active shape="round" size="default" />
+                <Skeleton.Button active shape="round" size="default" />
+              </Space>
+            )}
+          </div>
+
+          {/* </div>   */}
 
           {data.length === 0 && !loading && (
             <Typography.Title level={5} type="warning">
@@ -143,22 +196,11 @@ const PlaysPage: React.FC = () => {
             </Typography.Title>
           )}
 
-          {loading && (
-            <Space direction="horizontal">
-              <Skeleton.Button active shape="round" size="default" />
-              <Skeleton.Button active shape="round" size="default" />
-              <Skeleton.Button active shape="round" size="default" />
-            </Space>
-          )}
+
         </Container>
-        {nextPage && !loading && (
-          <FloatingButton
-            Icon={RetweetOutlined}
-            onClick={loadNext}
-            inContainer
-          />
-        )}
-      </Container>
+
+
+      </Container >
     </>
   );
 };
