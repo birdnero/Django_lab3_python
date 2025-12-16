@@ -7,55 +7,47 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useEffect, useState } from "react";
+import { Varialbles } from "../../config";
+import { useToken } from "../../utils/StateManager";
 
-const sampleData = [
-  { name: "Львівський національний театр опери та балету", rate: 4.9 },
-  { name: "Київський театр драми і комедії", rate: 4.8 },
-  { name: "Національний академічний драматичний театр ім. Франка", rate: 4.8 },
-  { name: "Театр ім. Лесі Українки", rate: 4.7 },
-  { name: "Харківський театр опери та балету", rate: 4.7 },
-  { name: "Одеський національний театр опери", rate: 4.6 },
-  { name: "Театр на Подолі", rate: 4.6 },
-  { name: "Львівський театр ім. Заньковецької", rate: 4.5 },
-  { name: "Чернівецький музично-драматичний театр", rate: 4.5 },
-  { name: "Театр ім. Курбаса", rate: 4.4 },
-  { name: "Дніпровський академічний театр драми", rate: 4.4 },
-  { name: "Полтавський академічний обласний театр", rate: 4.3 },
-  { name: "Волинський академічний театр", rate: 4.3 },
-  { name: "Запорізький обласний театр", rate: 4.2 },
-  { name: "Тернопільський драмтеатр", rate: 4.2 },
-  { name: "Київський театр оперети", rate: 4.1 },
-  { name: "Херсонський театр ім. Куліша", rate: 4.1 },
-  { name: "Черкаський музично-драматичний театр", rate: 4.0 },
-  { name: "Сумський театр ім. Щепкіна", rate: 4.0 },
-  { name: "Рівненський академічний драмтеатр", rate: 3.9 },
-  { name: "Івано-Франківський обласний драмтеатр", rate: 3.9 },
-  { name: "Житомирський драмтеатр", rate: 3.8 },
-  { name: "Ужгородський обласний музично-драматичний театр", rate: 3.8 },
-  {
-    name: "Чернігівський академічний український музично-драматичний театр",
-    rate: 3.7,
-  },
-  { name: "Кропивницький академічний музично-драматичний театр", rate: 3.7 },
-  { name: "Миколаївський академічний театр", rate: 3.2 },
-  { name: "Луцький театр ляльок", rate: 3.1 },
-  { name: "Київський експериментальний театр", rate: 3.0 },
-  { name: "Театр ім. Падлюки", rate: 2.9 },
-  { name: "Провінційний театр 'Затишок'", rate: 2.7 },
-];
+type RatingItem = {
+  name: string;
+  rating: number;
+};
 
 export default function MyBarChart() {
+  const [data, setData] = useState<RatingItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${Varialbles.backend}api/theaters/stats/rating/2/`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${useToken.getState().token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setData(data);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+
   return (
     <ResponsiveContainer width="100%" height={300}>
       <BarChart
-        data={sampleData}
+        data={data}
         margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
       >
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
+        <XAxis dataKey="name" hide/>
         <YAxis domain={[0, 5]} />
         <Tooltip />
-        <Bar dataKey="rate" fill="#8884d8" />
+        <Bar dataKey="rating" fill="#8884d8" />
       </BarChart>
     </ResponsiveContainer>
   );

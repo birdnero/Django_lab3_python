@@ -11,7 +11,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 
-return_style = "list" # or records
+return_style = "records" # or records
 
 
 class DefaultPagination(PageNumberPagination):
@@ -114,7 +114,9 @@ class PlayViewSet(BaseViewSet):
     @action(detail=False, methods=["get"], url_path="stats")
     def stats_actors(self, _):
         qs = self.repository.stats()
-        return Response(pd.DataFrame(list(qs)).fillna(0).to_dict(return_style))
+        df = pd.DataFrame(list(qs)).dropna()
+        df = df.sort_values(by="likes_amount", ascending=False)
+        return Response(df[["likes_amount", "rating"]].to_dict(return_style))
     
     @action(detail=True, methods=["post"])
     def rate(self, request, pk=None):
@@ -214,13 +216,13 @@ class TheatreViewSet(BaseViewSet):
     def update(self, request, pk=None):
         return super().update(request, pk)
 
-    @action(detail=False, methods=["get"], url_path="stats/rating")
-    def stats_rating(self, _):
-        qs = self.repository.rating()
-        df = pd.DataFrame.from_records(qs.values()).dropna().sort_values(by=["rating"], ascending=False)
+    # @action(detail=False, methods=["get"], url_path="stats/rating")
+    # def stats_rating(self, _):
+    #     qs = self.repository.rating()
+    #     df = pd.DataFrame.from_records(qs.values()).dropna().sort_values(by=["rating"], ascending=False)
 
-        df["rating"] = df["rating"].round(1)
-        return Response(df.to_dict("records"))
+    #     df["rating"] = df["rating"].round(1)
+    #     return Response(df.to_dict("records"))
     
     @action(detail=False, methods=["get"], url_path="stats/rating/2")
     def stats_rating(self, _):
@@ -228,7 +230,7 @@ class TheatreViewSet(BaseViewSet):
         df = pd.DataFrame.from_records(qs.values()).dropna().sort_values(by=["rating"], ascending=False)
 
         df["rating"] = df["rating"].round(1)
-        return Response(df[["theatre_id", "rating"]].to_dict(return_style))
+        return Response(df[["name", "rating"]].to_dict(return_style))
 
 
 class TicketViewSet(BaseViewSet):
@@ -247,13 +249,13 @@ class TicketViewSet(BaseViewSet):
     def stats_month(self, _):
         qs = self.repository.sold_by_month()
         df = pd.DataFrame(list(qs)).sort_values(by="month", ascending=True)
-        return Response(df.to_dict(return_style))
+        return Response(df[["date", "amount"]].to_dict(return_style))
     
     @action(detail=False, methods=["get"], url_path="stats/by/date")
     def stats_date(self, _):
         qs = self.repository.stats_by_date()
         df = pd.DataFrame(list(qs)).sort_values(by="date", ascending=True)
-        return Response(df.to_dict(return_style))
+        return Response(df[["date", "amount"]].to_dict(return_style))
 
 
 class UserViewSet(BaseViewSet):
