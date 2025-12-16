@@ -31,10 +31,10 @@ def analitics_for_theater(data):
 
     z = (prices - prices.mean()) / prices.std(ddof=0)
     
-    prices2 = df["price"].astype(float).values
+    # prices2 = df["price"].astype(float).values
 
-    diff_matrix = np.abs(prices2[:, None] - prices2[None, :])
-    avg_pair_diff = float(diff_matrix.mean())
+    # diff_matrix = np.abs(prices2[:, None] - prices2[None, :])
+    # avg_pair_diff = float(diff_matrix.mean())
     
 
     return {
@@ -46,7 +46,7 @@ def analitics_for_theater(data):
         "price_cv": float(prices.std() / prices.mean()),  # варіативність
         "outliers": int((z.abs() > 3).sum()),  # дорогі/дешеві
         "peak_hour": int(df["time"].value_counts().idxmax()),
-        "avg_pair_diff": avg_pair_diff,
+        # "avg_pair_diff": avg_pair_diff,
     }
 
 
@@ -58,7 +58,7 @@ class DefaultPagination(PageNumberPagination):
 class BaseViewSet(viewsets.GenericViewSet):
     repository = None
     serializer_class = None
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated()]
 
     def list(self, _):
         objs = self.repository.get_all()
