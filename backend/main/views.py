@@ -65,6 +65,9 @@ class PlayViewSet(BaseViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = PlayFilter
 
+    def get_serializer_context(self):
+        return {"request": self.request}
+
     @swagger_auto_schema(request_body=serializer_class)
     def create(self, request):
         return super().create(request)
@@ -80,8 +83,29 @@ class PlayViewSet(BaseViewSet):
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(queryset, request)
 
-        serializer = self.serializer_class(page, many=True)
+        serializer = self.get_serializer(page, many=True)
         return paginator.get_paginated_response(serializer.data)
+    
+    def retrieve(self, request, pk=None):
+        obj = self.repository.get_by_id(pk)
+        if obj is None:
+            return Response(f"there is no object with id = {pk}", status=404)
+
+        serializer = self.get_serializer(obj)
+        return Response(serializer.data)
+
+    
+    @action(detail=True, methods=["post"])
+    def like(self, request, pk=None):
+        serializer = PlayLikeToggleSerializer(
+            data={},
+            context={"request": request, "view": self}
+        )
+
+        serializer.is_valid(raise_exception=True)
+        result = serializer.save()
+
+        return Response(result, status=status.HTTP_200_OK)
 
 
 class ActorViewSet(BaseViewSet):
@@ -203,8 +227,8 @@ class UserViewSet(BaseViewSet):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             validated_data = serializer.validated_data
-            obj = serializer.save()
-            # obj = self.repository.create(**validated_data)
+            #obj = serializer.save()
+            obj = self.repository.create(**validated_data)
             if obj is None:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             response_serializer = self.serializer_class(obj)
@@ -222,8 +246,8 @@ class UserViewSet(BaseViewSet):
         serializer = self.serializer_class(instance, data=request.data, partial=False)
         if serializer.is_valid():
             validated_data = serializer.validated_data
-            instance = serializer.save()
-            # instance = self.repository.update(instance, **validated_data)
+            #instance = serializer.save()
+            instance = self.repository.update(instance, **validated_data)
             response_serializer = self.serializer_class(instance)
             return Response(response_serializer.data)
 

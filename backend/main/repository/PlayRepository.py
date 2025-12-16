@@ -36,3 +36,13 @@ class PlayRepository(BaseRepository):
         except Exception as exc:
             print("Error:", exc)
             return None
+ 
+    def toggle_like(self, user, play_id):
+        play = Play.objects.get(pk=play_id)
+
+        if play in user.liked_plays.all():
+            user.liked_plays.remove(play)
+            return False
+        else:
+            user.liked_plays.add(play)
+            return True
