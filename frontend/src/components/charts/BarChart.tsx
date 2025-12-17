@@ -8,7 +8,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useEffect, useState } from "react";
-import { Varialbles } from "../../config";
 import { getQuery } from "../../utils/RestUtils";
 
 type RatingItem = {
@@ -21,7 +20,7 @@ export default function MyBarChart() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getQuery(`${Varialbles.backend}api/theaters/stats/rating/2/`)
+    getQuery(`api/theaters/stats/rating/2/`)
       .then((data) => {
         setData(data as RatingItem[] ?? []);
         setLoading(false)
