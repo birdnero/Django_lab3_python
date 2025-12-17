@@ -281,7 +281,7 @@ class TheatreViewSet(BaseViewSet):
         return Response(df[["name", "rating"]].to_dict(return_style))
     
     @action(detail=False, methods=["get"], url_path="stats/daily")
-    def stats_rating(self, request):
+    def stats_daily(self, request):
         return_style = get_return_style(request)
 
         qs = self.repository.daily_tickets()
