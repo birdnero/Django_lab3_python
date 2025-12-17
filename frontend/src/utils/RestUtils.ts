@@ -25,10 +25,11 @@ const handleAuth = (data: Response) => {
             location.assign("/login")
         }
     }
-
+    console.log(data);
+    
     if (data.status == 401) {
         location.assign("/login")
-        // data.text().then(r => JSON.parse(r)).then(r => errorAuth(r))
+        data.text().then(r => JSON.parse(r)).then(r => errorAuth(r))
     }
     return Promise.resolve((null))
 }

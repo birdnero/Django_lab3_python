@@ -15,8 +15,14 @@ from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import *
 
-return_style = "records"  # or list 
+return_style = "records"  # or list
 
+
+def get_return_style(request):
+    return_style = request.query_params.get("return_type", "records")
+    if return_style not in ["records", "list"]:
+        return_style = "records"
+    return return_style
 
 
 def analitics_for_theater(data):
@@ -25,17 +31,16 @@ def analitics_for_theater(data):
     df = pd.DataFrame(data["tickets"])
     if df.empty:
         return {"theatre_id": data["theatre_id"], "empty": True}
-    
-    df["time"] = df["time"].apply(lambda x: x.hour)    
+
+    df["time"] = df["time"].apply(lambda x: x.hour)
     prices = df["price"].astype(float)
 
     z = (prices - prices.mean()) / prices.std(ddof=0)
-    
+
     # prices2 = df["price"].astype(float).values
 
     # diff_matrix = np.abs(prices2[:, None] - prices2[None, :])
     # avg_pair_diff = float(diff_matrix.mean())
-    
 
     return {
         "theatre_id": data["theatre_id"],
@@ -125,7 +130,7 @@ class PlayViewSet(BaseViewSet):
         page = paginator.paginate_queryset(queryset, request)
         serializer = self.serializer_class(page, many=True)
         return paginator.get_paginated_response(serializer.data)
-    
+
     def retrieve(self, request, pk=None):
         obj = self.repository.get_by_id(pk)
         if obj is None:
@@ -134,13 +139,9 @@ class PlayViewSet(BaseViewSet):
         serializer = self.get_serializer(obj)
         return Response(serializer.data)
 
-    
     @action(detail=True, methods=["post"])
     def like(self, request, pk=None):
-        serializer = PlayLikeToggleSerializer(
-            data={},
-            context={"request": request, "view": self}
-        )
+        serializer = PlayLikeToggleSerializer(data={}, context={"request": request, "view": self})
 
         serializer.is_valid(raise_exception=True)
         result = serializer.save()
@@ -148,25 +149,26 @@ class PlayViewSet(BaseViewSet):
         return Response(result, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["get"], url_path="stats")
-    def stats_1(self, _):
+    def stats_1(self, request):
+        return_style = get_return_style(request)
+
         qs = self.repository.stats()
         df = pd.DataFrame(list(qs)).dropna()
         df = df.sort_values(by="likes_amount", ascending=False)
         return Response(df[["likes_amount", "rating"]].to_dict(return_style))
-    
+
     @action(detail=False, methods=["get"], url_path="stats/2")
-    def stats_2(self, _):
+    def stats_2(self, request):
+        return_style = get_return_style(request)
+
         qs = self.repository.stats()
         df = pd.DataFrame(list(qs)).dropna()
         df = df.sort_values(by="rating", ascending=False)
         return Response(df[["name", "rating"]].to_dict(return_style))
-    
+
     @action(detail=True, methods=["post"])
     def rate(self, request, pk=None):
-        serializer = PlayRatingSerializer(
-            data=request.data,
-            context={"request": request, "view": self, "play_id": pk}
-        )
+        serializer = PlayRatingSerializer(data=request.data, context={"request": request, "view": self, "play_id": pk})
         serializer.is_valid(raise_exception=True)
         result = serializer.save()
         return Response(result, status=status.HTTP_200_OK)
@@ -183,6 +185,13 @@ class ActorViewSet(BaseViewSet):
     @swagger_auto_schema(request_body=serializer_class)
     def update(self, request, pk=None):
         return super().update(request, pk)
+    
+    @action(detail=False, methods=["get"], url_path="stats/by/play")
+    def stats_genre(self, request):
+        return_style = get_return_style(request)
+
+        qs = self.repository.stats_by_play()
+        return Response(pd.DataFrame(list(qs)).dropna().to_dict(return_style))
 
 
 class DirectorViewSet(BaseViewSet):
@@ -211,7 +220,9 @@ class GenreViewSet(BaseViewSet):
         return super().update(request, pk)
 
     @action(detail=False, methods=["get"], url_path="stats/by/name")
-    def stats_genre(self, _):
+    def stats_genre(self, request):
+        return_style = get_return_style(request)
+
         qs = self.repository.stats()
         return Response(pd.DataFrame(list(qs)).fillna(0).to_dict(return_style))
 
@@ -258,14 +269,31 @@ class TheatreViewSet(BaseViewSet):
     @swagger_auto_schema(request_body=serializer_class)
     def update(self, request, pk=None):
         return super().update(request, pk)
-    
+
     @action(detail=False, methods=["get"], url_path="stats/rating/2")
-    def stats_rating(self, _):
+    def stats_rating(self, request):
+        return_style = get_return_style(request)
+
         qs = self.repository.rating()
         df = pd.DataFrame.from_records(qs.values()).dropna().sort_values(by=["rating"], ascending=False)
 
         df["rating"] = df["rating"].round(1)
         return Response(df[["name", "rating"]].to_dict(return_style))
+    
+    @action(detail=False, methods=["get"], url_path="stats/daily")
+    def stats_daily(self, request):
+        return_style = get_return_style(request)
+
+        qs = self.repository.daily_tickets()
+        df = pd.DataFrame.from_records(qs).dropna()
+
+        return Response(df.to_dict(return_style))
+
+    #############################################################################################################
+    #############################################################################################################
+    ##############################не хвилюйтеся, це тимчасова стіна від мого говнокоду###########################
+    #############################################################################################################
+    #############################################################################################################
 
     def count_tickets_for_theatre(self, theatre_id):
         query_set = (
@@ -273,9 +301,8 @@ class TheatreViewSet(BaseViewSet):
             .annotate(time=F("schedule__time"))
             .values("price", "time")
         )
-        
-        return {"theatre_id": theatre_id, "tickets": list(query_set)}
 
+        return {"theatre_id": theatre_id, "tickets": list(query_set)}
 
     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TEST ПОКИ ЩО
     @action(detail=False, methods=["get"], url_path="multithread-test")
@@ -288,7 +315,7 @@ class TheatreViewSet(BaseViewSet):
 
         with ThreadPoolExecutor(max_workers=THREADS) as executor1:
             data = list(executor1.map(self.count_tickets_for_theatre, theatre_ids))
-            
+
         # return Response(data)
 
         with ProcessPoolExecutor(max_workers=THREADS) as executor2:
@@ -306,6 +333,12 @@ class TheatreViewSet(BaseViewSet):
 
         return Response(response)
 
+    #############################################################################################################
+    #############################################################################################################
+    ###############################################кінець стіни##################################################
+    #############################################################################################################
+    #############################################################################################################
+
 
 class TicketViewSet(BaseViewSet):
     repository = Repository().tickets
@@ -320,13 +353,17 @@ class TicketViewSet(BaseViewSet):
         return super().update(request, pk)
 
     @action(detail=False, methods=["get"], url_path="stats/by/month")
-    def stats_month(self, _):
+    def stats_month(self, request):
+        return_style = get_return_style(request)
+
         qs = self.repository.sold_by_month()
         df = pd.DataFrame(list(qs)).sort_values(by="month", ascending=True)
         return Response(df[["date", "amount"]].to_dict(return_style))
-    
+
     @action(detail=False, methods=["get"], url_path="stats/by/date")
-    def stats_date(self, _):
+    def stats_date(self, request):
+        return_style = get_return_style(request)
+
         qs = self.repository.stats_by_date()
         df = pd.DataFrame(list(qs)).sort_values(by="date", ascending=True)
         return Response(df[["date", "amount"]].to_dict(return_style))

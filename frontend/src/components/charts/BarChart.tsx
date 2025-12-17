@@ -8,8 +8,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useEffect, useState } from "react";
-import { Varialbles } from "../../config";
-import { useToken } from "../../utils/StateManager";
+import { getQuery } from "../../utils/RestUtils";
 
 type RatingItem = {
   name: string;
@@ -21,18 +20,11 @@ export default function MyBarChart() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${Varialbles.backend}api/theaters/stats/rating/2/`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${useToken.getState().token}`,
-      },
-    })
-      .then((res) => res.json())
+    getQuery(`api/theaters/stats/rating/2/`)
       .then((data) => {
-        setData(data);
+        setData(data as RatingItem[] ?? []);
+        setLoading(false)
       })
-      .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <div>Loading...</div>;
