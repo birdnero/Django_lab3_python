@@ -1,4 +1,4 @@
-import type React from "react";
+import * as React from "react";
 import MyBarChart from "../components/charts/BarChart";
 import { colors } from "../config";
 import { Typography } from "antd";
@@ -74,7 +74,7 @@ const RechartsPage: React.FC = () => {
           <MyTreeMapChart />
         </div>
         <div style={chartWrapper}>
-          <Typography.Paragraph>Rating vs favoriate</Typography.Paragraph>
+          <Typography.Paragraph>Rating vs likes</Typography.Paragraph>
           <MyScatterChart />
         </div>
       </div>

@@ -15,7 +15,7 @@ from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import *
 
-return_style = "records"  # or records 
+return_style = "records"  # or list 
 
 
 
@@ -58,7 +58,7 @@ class DefaultPagination(PageNumberPagination):
 class BaseViewSet(viewsets.GenericViewSet):
     repository = None
     serializer_class = None
-    permission_classes = [IsAuthenticated()]
+    permission_classes = [AllowAny]
 
     def list(self, _):
         objs = self.repository.get_all()
@@ -148,11 +148,18 @@ class PlayViewSet(BaseViewSet):
         return Response(result, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["get"], url_path="stats")
-    def stats_actors(self, _):
+    def stats_1(self, _):
         qs = self.repository.stats()
         df = pd.DataFrame(list(qs)).dropna()
         df = df.sort_values(by="likes_amount", ascending=False)
         return Response(df[["likes_amount", "rating"]].to_dict(return_style))
+    
+    @action(detail=False, methods=["get"], url_path="stats/2")
+    def stats_2(self, _):
+        qs = self.repository.stats()
+        df = pd.DataFrame(list(qs)).dropna()
+        df = df.sort_values(by="rating", ascending=False)
+        return Response(df[["name", "rating"]].to_dict(return_style))
     
     @action(detail=True, methods=["post"])
     def rate(self, request, pk=None):
@@ -251,14 +258,6 @@ class TheatreViewSet(BaseViewSet):
     @swagger_auto_schema(request_body=serializer_class)
     def update(self, request, pk=None):
         return super().update(request, pk)
-
-    # @action(detail=False, methods=["get"], url_path="stats/rating")
-    # def stats_rating(self, _):
-    #     qs = self.repository.rating()
-    #     df = pd.DataFrame.from_records(qs.values()).dropna().sort_values(by=["rating"], ascending=False)
-
-    #     df["rating"] = df["rating"].round(1)
-    #     return Response(df.to_dict("records"))
     
     @action(detail=False, methods=["get"], url_path="stats/rating/2")
     def stats_rating(self, _):

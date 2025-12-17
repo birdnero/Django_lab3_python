@@ -50,9 +50,9 @@ class PlayRepository(BaseRepository):
             return True
 
     def stats(self):
-        qs = self.model.objects.values("play_id").annotate(
-            actors_amount=Count("actors__actor_id"),
-            likes_amount=Count("liked_by__email"),
+        qs = self.model.objects.values("play_id", "name").annotate(
+            actors_amount=Count("actors__actor_id", distinct=True),
+            likes_amount=Count("liked_by__email", distinct=True),
             rating=Avg("playrating__rating"),
             avg_ticket_price=Avg("schedule__ticket__price"),
             ticked_sold_amount=Count("schedule__ticket__ticket_id", filter=Q(schedule__ticket__status="проданий")),

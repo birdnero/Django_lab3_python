@@ -1,45 +1,10 @@
+import { useState, useEffect } from "react";
 import { ResponsiveContainer, Treemap } from "recharts";
-
-const sampleData = [
-  { title: "Гамлет", rate: 4.9 },
-  { title: "Король Лір", rate: 4.8 },
-  { title: "Лісова пісня", rate: 4.8 },
-  { title: "Тіні забутих предків", rate: 4.7 },
-  { title: "Кайдашева сім’я", rate: 4.7 },
-  { title: "Ромео і Джульєтта", rate: 4.6 },
-  { title: "Наталка Полтавка", rate: 4.6 },
-  { title: "Сто тисяч", rate: 4.5 },
-  { title: "Мартин Боруля", rate: 4.5 },
-  { title: "Свайпаючи ліворуч", rate: 4.4 },
-  { title: "Три товариші", rate: 4.4 },
-  { title: "Кайдаш", rate: 4.3 },
-  { title: "Оркестр мрії", rate: 4.3 },
-  { title: "Ляльковий будинок", rate: 4.2 },
-  { title: "Іван Васильович міняє професію", rate: 4.2 },
-  { title: "Ніч перед Різдвом", rate: 4.1 },
-  { title: "Одруження", rate: 4.1 },
-  { title: "Сватання на Гончарівці", rate: 4.0 },
-  { title: "Пігмаліон", rate: 4.0 },
-  { title: "Крик на мості", rate: 3.9 },
-  { title: "Моя професія — синьйор з вищого світу", rate: 3.9 },
-  { title: "Фрічний вечір", rate: 3.8 },
-  { title: "Дракула", rate: 3.8 },
-  { title: "Енеїда", rate: 3.7 },
-  { title: "Втеча", rate: 3.7 },
-  { title: "Фнаф", rate: 2.9 },
-  { title: "Крик душі", rate: 2.8 },
-  { title: "Прокляття баби Ганни", rate: 2.7 },
-  { title: "Тун-Тун Захур", rate: 2.6 },
-  { title: "Хаос у театрі", rate: 2.5 },
-];
-
-const data = sampleData.map((d) => ({
-  ...d,
-  size: d.rate * 100,
-}));
+import { Varialbles } from "../../config";
+import { useToken } from "../../utils/StateManager";
 
 function CustomContent(props: any) {
-  const { x, y, width, height, title, rate } = props;
+  const { x, y, width, height, name, rating } = props;
 
   if (width < 80 || height < 40) return null;
 
@@ -54,7 +19,7 @@ function CustomContent(props: any) {
         strokeOpacity={0}
         fontSize={12}
       >
-        {title}
+        {name}
       </text>
       <text
         x={x + width / 2}
@@ -64,20 +29,49 @@ function CustomContent(props: any) {
         strokeOpacity={0}
         fontSize={12}
       >
-        ⭐ {rate}
+        ⭐ {rating}
       </text>
     </g>
   );
 }
 
+type DataItem = {
+  name: string;
+  rating: number;
+  size: number;
+};
+
 export default function MyTreeMapChart() {
+  const [data, setData] = useState<DataItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${Varialbles.backend}api/plays/stats/2/`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${useToken.getState().token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setData(data.map((d) => ({
+          ...d,
+          size: d.rating * 100,
+        })));
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+
   return (
-    <ResponsiveContainer width="100%" height={700} aspect={4 / 3}>
+    <ResponsiveContainer width="100%" height={500} aspect={4 / 3}>
       <Treemap
         width="100%"
         height="100%"
         data={data}
-        dataKey="rate"
+        dataKey="rating"
         stroke="#fff"
         fill="#82ca9d"
         content={<CustomContent />}
