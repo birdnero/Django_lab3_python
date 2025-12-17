@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ResponsiveContainer, Treemap } from "recharts";
-import { Varialbles } from "../../config";
-import { useToken } from "../../utils/StateManager";
+import { Varialbles } from "../../../config";
+import { useToken } from "../../../utils/StateManager";
 
 function CustomContent(props: any) {
   const { x, y, width, height, name, rating } = props;
@@ -50,15 +50,17 @@ export default function MyTreeMapChart() {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${useToken.getState().token}`,
+        Authorization: `Bearer ${useToken.getState().token}`,
       },
     })
       .then((res) => res.json())
       .then((data) => {
-        setData(data.map((d) => ({
-          ...d,
-          size: d.rating * 100,
-        })));
+        setData(
+          data.map((d: { rating: number }) => ({
+            ...d,
+            size: d.rating * 100,
+          }))
+        );
       })
       .finally(() => setLoading(false));
   }, []);

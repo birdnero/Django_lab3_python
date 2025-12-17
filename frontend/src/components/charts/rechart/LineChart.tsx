@@ -8,8 +8,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { Varialbles } from "../../config";
-import { useToken } from "../../utils/StateManager";
+import { Varialbles } from "../../../config";
+import { useToken } from "../../../utils/StateManager";
 
 type DateStat = {
   date: string;
@@ -21,21 +21,21 @@ export default function MyLineChart() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-      fetch(`${Varialbles.backend}api/tickets/stats/by/date/`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${useToken.getState().token}`,
-        },
+    fetch(`${Varialbles.backend}api/tickets/stats/by/date/`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${useToken.getState().token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setData(data);
       })
-        .then((res) => res.json())
-        .then((data) => {
-          setData(data);
-        })
-        .finally(() => setLoading(false));
-    }, []);
-  
-    if (loading) return <div>Loading...</div>;
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
 
   return (
     <ResponsiveContainer width="100%" height={300}>

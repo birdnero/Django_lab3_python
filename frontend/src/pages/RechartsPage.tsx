@@ -1,15 +1,15 @@
 import type React from "react";
-import MyBarChart from "../components/charts/rerchart/BarChart";
+import MyBarChart from "../components/charts/rechart/BarChart";
 import { Typography } from "antd";
-import MyLineChart from "../components/charts/rerchart/LineChart";
-import MyPieChart from "../components/charts/rerchart/PieChart";
-import MyAreaChart from "../components/charts/rerchart/AreaChart";
+import MyLineChart from "../components/charts/rechart/LineChart";
+import MyPieChart from "../components/charts/rechart/PieChart";
+import MyAreaChart from "../components/charts/rechart/AreaChart";
 import { FloatingContainer } from "../components/FloatingContainer";
 import { FloatingButton } from "../components/FloatingButton";
 import { LeftCircleFilled } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import MyScatterChart from "../components/charts/rerchart/ScatterChart";
-import MyTreeMapChart from "../components/charts/rerchart/TreeMapChart";
+import MyScatterChart from "../components/charts/rechart/ScatterChart";
+import MyTreeMapChart from "../components/charts/rechart/TreeMapChart";
 import { ChartDiv } from "../components/ChartDiv";
 
 const RechartsPage: React.FC = () => {

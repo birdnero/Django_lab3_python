@@ -8,8 +8,8 @@ import {
   YAxis,
   Tooltip,
 } from "recharts";
-import { Varialbles } from "../../config";
-import { useToken } from "../../utils/StateManager";
+import { Varialbles } from "../../../config";
+import { useToken } from "../../../utils/StateManager";
 
 type DataItem = {
   likes_amount: number;
@@ -25,7 +25,7 @@ export default function MyScatterChart() {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${useToken.getState().token}`,
+        Authorization: `Bearer ${useToken.getState().token}`,
       },
     })
       .then((res) => res.json())
