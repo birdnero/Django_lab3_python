@@ -10,3 +10,10 @@ class TheatreRepository(BaseRepository):
 
     def rating(self):
         return self.model.objects.annotate(rating=Avg("hall__schedule__play__playrating__rating")).order_by("-rating")
+
+    def count_tickets(self, theatre_id):
+        return (
+            Theatre.objects
+            .filter(id=theatre_id)
+            .count()
+        ) 

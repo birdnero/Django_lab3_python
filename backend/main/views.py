@@ -14,6 +14,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import *
+from django.db import close_old_connections
 
 return_style = "list"  # or records 
 
@@ -26,15 +27,22 @@ def analitics_for_theater(data):
     if df.empty:
         return {"theatre_id": data["theatre_id"], "empty": True}
     
+    # for i in range(10000000):
+    #     df["wme"] = df["time"].apply(lambda x: x.hour + i)    
+    
     df["time"] = df["time"].apply(lambda x: x.hour)    
     prices = df["price"].astype(float)
 
+    for i in range(10000):
+        df["time"] = df["time"] + i
+        df["time"] = df["time"] - i
+
     z = (prices - prices.mean()) / prices.std(ddof=0)
     
-    # prices2 = df["price"].astype(float).values
+    prices2 = df["price"].astype(float).values
 
-    # diff_matrix = np.abs(prices2[:, None] - prices2[None, :])
-    # avg_pair_diff = float(diff_matrix.mean())
+    diff_matrix = np.abs(prices2[:, None] - prices2[None, :])
+    avg_pair_diff = float(diff_matrix.mean())
     
 
     return {
@@ -46,7 +54,7 @@ def analitics_for_theater(data):
         "price_cv": float(prices.std() / prices.mean()),  # варіативність
         "outliers": int((z.abs() > 3).sum()),  # дорогі/дешеві
         "peak_hour": int(df["time"].value_counts().idxmax()),
-        # "avg_pair_diff": avg_pair_diff,
+        "avg_pair_diff": avg_pair_diff,
     }
 
 
@@ -58,7 +66,7 @@ class DefaultPagination(PageNumberPagination):
 class BaseViewSet(viewsets.GenericViewSet):
     repository = None
     serializer_class = None
-    permission_classes = [IsAuthenticated()]
+    permission_classes = [AllowAny]
 
     def list(self, _):
         objs = self.repository.get_all()
@@ -267,6 +275,7 @@ class TheatreViewSet(BaseViewSet):
         return Response(df[["theatre_id", "rating"]].to_dict(return_style))
 
     def count_tickets_for_theatre(self, theatre_id):
+        close_old_connections()
         query_set = (
             Ticket.objects.filter(schedule__hall__theatre_id=theatre_id)
             .annotate(time=F("schedule__time"))
@@ -279,23 +288,25 @@ class TheatreViewSet(BaseViewSet):
     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TEST ПОКИ ЩО
     @action(detail=False, methods=["get"], url_path="multithread-test")
     def concurrency_test(self, request):
+        # close_old_connections()
         THREADS = int(request.query_params.get("threads", 1))
 
         theatre_ids = list(self.repository.get_all().values_list("theatre_id", flat=True))
 
-        start = time.perf_counter()
 
         with ThreadPoolExecutor(max_workers=THREADS) as executor1:
             data = list(executor1.map(self.count_tickets_for_theatre, theatre_ids))
             
         # return Response(data)
 
+        start = time.perf_counter()
         with ProcessPoolExecutor(max_workers=THREADS) as executor2:
             analitics = list(executor2.map(analitics_for_theater, data))
-
+        
         elapsed = time.perf_counter() - start
 
         df = pd.DataFrame({"theatre_id": theatre_ids, "tickets_sold": data, "analitics": analitics})
+
 
         response = {
             "threads": THREADS,
