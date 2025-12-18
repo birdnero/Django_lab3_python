@@ -7,6 +7,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Label,
 } from "recharts";
 import { getQuery } from "../../../utils/RestUtils";
 
@@ -20,11 +21,11 @@ export default function MyLineChart() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-      getQuery(`api/tickets/stats/by/date/`).then((data) => {
-        setData((data as DataItem[]) ?? []);
-        setLoading(false);
-      });
-    }, []);
+    getQuery(`api/tickets/stats/by/date/`).then((data) => {
+      setData((data as DataItem[]) ?? []);
+      setLoading(false);
+    });
+  }, []);
 
   if (loading) return <div>Loading...</div>;
 
@@ -36,9 +37,21 @@ export default function MyLineChart() {
       >
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="date" />
-        <YAxis />
+        <YAxis>
+          <Label
+            value="Кількість квитків"
+            angle={-90}
+            position="insideLeft"
+            style={{ textAnchor: "middle" }}
+          />
+        </YAxis>
         <Tooltip />
-        <Line type="monotone" dataKey="amount" stroke="#8884d8" />
+        <Line
+          type="monotone"
+          dataKey="amount"
+          stroke="#8884d8"
+          activeDot={{ r: 8 }}
+        />
       </LineChart>
     </ResponsiveContainer>
   );

@@ -3,12 +3,14 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
+  Label,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
 import { getQuery } from "../../../utils/RestUtils";
+import randomColor from "randomcolor";
 
 type DataItem = {
   date: string;
@@ -24,9 +26,6 @@ type RawItem = {
   tickets_sold: number;
 };
 
-
-const colors = ["#8884d8", "#82ca9d", "#ffc658"];
-
 export default function MyAreaChart() {
   const [data, setData] = useState<DataItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,13 +33,12 @@ export default function MyAreaChart() {
   const [metric, setMetric] = useState<Metric>("income");
   const [rawData, setRawData] = useState<RawItem[]>([]);
 
-
   useEffect(() => {
     getQuery<RawItem[]>(`api/theaters/stats/daily/`)
       .then((data = []) => {
-        data = data ?? []
+        data = data ?? [];
         setRawData(data);
-        setTheaterNames(Array.from(new Set(data.map(d => d.name))));
+        setTheaterNames(Array.from(new Set(data.map((d) => d.name))));
       })
       .finally(() => setLoading(false));
   }, []);
@@ -48,17 +46,13 @@ export default function MyAreaChart() {
   useEffect(() => {
     if (!rawData.length) return;
 
-    const dates = Array.from(
-      new Set(rawData.map(d => d.date))
-    ).sort();
+    const dates = Array.from(new Set(rawData.map((d) => d.date))).sort();
 
-    const chartData: DataItem[] = dates.map(date => {
+    const chartData: DataItem[] = dates.map((date) => {
       const obj: DataItem = { date };
 
-      theaterNames.forEach(name => {
-        const found = rawData.find(
-          d => d.name === name && d.date === date
-        );
+      theaterNames.forEach((name) => {
+        const found = rawData.find((d) => d.name === name && d.date === date);
         obj[name] = found ? found[metric] : 0;
       });
 
@@ -69,6 +63,12 @@ export default function MyAreaChart() {
   }, [rawData, metric, theaterNames]);
 
   if (loading) return <div>Loading...</div>;
+
+  const areaColors = randomColor({
+    count: theaterNames.length,
+    luminosity: "light",
+    format: "hex",
+  });
 
   return (
     <>
@@ -87,17 +87,26 @@ export default function MyAreaChart() {
       <ResponsiveContainer width="100%" height={500}>
         <AreaChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" />
-          <YAxis />
+          <XAxis dataKey="date">
+            <Label value="Дата" position="insideBottom" />
+          </XAxis>
+          <YAxis>
+            <Label
+              value={metric === "income" ? "Прибуток" : "Кількість квитків"}
+              angle={-90}
+              position="insideLeft"
+              style={{ textAnchor: "middle" }}
+            />
+          </YAxis>
           <Tooltip />
           {theaterNames.map((name, idx) => (
             <Area
               key={name}
               type="monotone"
               dataKey={name}
-              // stackId="1"
-              stroke={colors[idx % colors.length]}
-              fill={colors[idx % colors.length]}
+              stroke={areaColors[idx]}
+              fill={areaColors[idx]}
+              activeDot={{ r: 8 }}
             />
           ))}
         </AreaChart>

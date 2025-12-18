@@ -45,7 +45,7 @@ export default function MyTreeMapChart() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getQuery(`api/plays/stats/2/`).then((data) => {
+    getQuery(`api/plays/stats/2/`).then((data: any) => {
       setData(
         (data ?? []).map((d: { rating: number }) => ({
           ...d,
@@ -60,6 +60,7 @@ export default function MyTreeMapChart() {
 
   return (
     <ResponsiveContainer width="100%" height={500} aspect={4 / 3}>
+      <div style={{ textAlign: "center", marginBottom: 8 }}>Рейтинг вистав</div>
       <Treemap
         width="100%"
         height="100%"
