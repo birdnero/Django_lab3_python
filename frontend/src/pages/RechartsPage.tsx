@@ -62,7 +62,7 @@ const RechartsPage: React.FC = () => {
           <MyTreeMapChart />
         </ChartDiv>
         <ChartDiv template="chart">
-          <Typography.Paragraph>Should you visit it?</Typography.Paragraph>
+          <Typography.Paragraph>Should you visit it??</Typography.Paragraph>
           <MyScatterChart />
         </ChartDiv>
       </ChartDiv>
