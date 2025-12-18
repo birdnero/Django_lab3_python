@@ -1,12 +1,8 @@
 import Plotly from "plotly.js-dist-min";
 import createPlotlyComponent from "react-plotly.js/factory";
+import { baseLayout, baseProps } from "./BaseLayout";
 
 const Plot = createPlotlyComponent(Plotly);
-
-const baseProps = {
-  useResizeHandler: true,
-  style: { width: "100%", height: "100%" },
-};
 
 export function MyBoxChart() {
   const data: Plotly.Data[] = [
@@ -18,8 +14,11 @@ export function MyBoxChart() {
   ];
 
   const layout: Partial<Plotly.Layout> = {
-    title: { text: "Розподіл цін квитків" },
-    yaxis: { title: { text: "Ціна (₴)" } },
+    ...baseLayout,
+    title: { text: "Out tickets random" },
+    yaxis: {
+      title: { text: "Price" },
+    },
   };
 
   return <Plot data={data} layout={layout} {...baseProps} />;

@@ -1,12 +1,8 @@
 import Plotly from "plotly.js-dist-min";
 import createPlotlyComponent from "react-plotly.js/factory";
+import { baseLayout, baseProps } from "./BaseLayout";
 
 const Plot = createPlotlyComponent(Plotly);
-
-const baseProps = {
-  useResizeHandler: true,
-  style: { width: "100%", height: "100%" },
-};
 
 export function MyCombinedChart() {
   const data: Plotly.Data[] = [
@@ -27,10 +23,11 @@ export function MyCombinedChart() {
   ];
 
   const layout: Partial<Plotly.Layout> = {
-    title: { text: "Відвідувачі та рейтинг" },
-    yaxis: { title: { text: "Відвідувачі" } },
+    ...baseLayout,
+    title: { text: "More visitors - better rating, isn't it?" },
+    yaxis: { title: { text: "Visitors" } },
     yaxis2: {
-      title: { text: "Рейтинг" },
+      title: { text: "Rating" },
       overlaying: "y",
       side: "right",
       range: [0, 5],

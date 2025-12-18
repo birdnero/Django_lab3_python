@@ -28,32 +28,41 @@ const RechartsPage: React.FC = () => {
         <Typography.Title level={1}>Some cool statistic</Typography.Title>
 
         <ChartDiv template="chart">
-          <Typography.Paragraph>Best theaters</Typography.Paragraph>
+          <Typography.Paragraph>
+            Best theaters(cause we cool)
+          </Typography.Paragraph>
           <MyBarChart />
         </ChartDiv>
 
         <ChartDiv template="chart">
-          <Typography.Paragraph>Tikets by date</Typography.Paragraph>
+          <Typography.Paragraph>
+            Tikets by <Typography.Text delete>year</Typography.Text>{" "}
+            <Typography.Text delete>month</Typography.Text> date!
+          </Typography.Paragraph>
           <MyLineChart />
         </ChartDiv>
 
         <ChartDiv template="chart">
-          <Typography.Paragraph>Top actors</Typography.Paragraph>
+          <Typography.Paragraph>
+            Actors without social life
+          </Typography.Paragraph>
           <MyPieChart />
         </ChartDiv>
 
         <ChartDiv template="chart">
           <Typography.Paragraph>
-            Status for theaters in some time
+            Mega race between theaters
           </Typography.Paragraph>
           <MyAreaChart />
         </ChartDiv>
         <ChartDiv template="chart">
-          <Typography.Paragraph>Best plays</Typography.Paragraph>
+          <Typography.Paragraph>
+            Wierd chart about best plays
+          </Typography.Paragraph>
           <MyTreeMapChart />
         </ChartDiv>
         <ChartDiv template="chart">
-          <Typography.Paragraph>Rating vs favoriate</Typography.Paragraph>
+          <Typography.Paragraph>Should you visit it?</Typography.Paragraph>
           <MyScatterChart />
         </ChartDiv>
       </ChartDiv>
