@@ -173,6 +173,14 @@ class PlayViewSet(BaseViewSet):
         result = serializer.save()
         return Response(result, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=["get"], url_path="stats/ratings")
+    def stats_actors(self, request):
+        return_style = get_return_style(request)
+        qs = self.repository.stats_plays_rating()
+        df = pd.DataFrame(list(qs)).dropna().sort_values(by="rating", ascending=True)
+        df["rating"] = df["rating"].astype(int)
+        return Response(df.to_dict(return_style))
+
 
 class ActorViewSet(BaseViewSet):
     repository = Repository().actors
@@ -225,7 +233,8 @@ class GenreViewSet(BaseViewSet):
         return_style = get_return_style(request)
 
         qs = self.repository.stats()
-        return Response(pd.DataFrame(list(qs)).fillna(0).to_dict(return_style))
+        df = pd.DataFrame(list(qs)).fillna(0)
+        return Response(df.to_dict(return_style))
 
 
 class HallViewSet(BaseViewSet):

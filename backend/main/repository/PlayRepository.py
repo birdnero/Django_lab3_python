@@ -68,4 +68,12 @@ class PlayRepository(BaseRepository):
             play=play,
             defaults={"rating": rating_value}
         )
+    
+    def stats_plays_rating(self):
+        qs = self.model.objects.values(rating=F("playrating__rating")).annotate(
+            ratings_count = Count("play_id")
+        )
+        
+        return qs
+
 
