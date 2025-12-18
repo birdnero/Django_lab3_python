@@ -12,7 +12,7 @@ export const baseLayout: Partial<Plotly.Layout> = {
 
 export const baseProps = {
   useResizeHandler: true,
-  style: { width: "100%", height: "100%" },
+  style: { width: "100%", height: 500 },
   config: {
     displayModeBar: false,
     responsive: true,
