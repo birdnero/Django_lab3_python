@@ -6,6 +6,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Label,
 } from "recharts";
 import { useEffect, useState } from "react";
 import { getQuery } from "../../../utils/RestUtils";
@@ -36,7 +37,14 @@ export default function MyBarChart() {
       >
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="name" hide />
-        <YAxis domain={[0, 5]} />
+        <YAxis domain={[0, 5]}>
+          <Label
+            value="Рейтинг"
+            angle={-90}
+            position="insideLeft"
+            style={{ textAnchor: "middle" }}
+          />
+        </YAxis>
         <Tooltip />
         <Bar dataKey="rating" fill="#8884d8" />
       </BarChart>
