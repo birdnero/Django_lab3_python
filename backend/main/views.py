@@ -406,7 +406,7 @@ class TicketViewSet(BaseViewSet):
         return Response(list(qs))
 
     @action(detail=False, methods=["get"], url_path="stats/by/price")
-    def stats_date(self, request):
+    def stats_price(self, request):
         return_style = get_return_style(request)
 
         qs = self.repository.sold_by_price()
