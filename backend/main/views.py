@@ -170,7 +170,7 @@ class PlayViewSet(BaseViewSet):
     def stats_3(self, request):
         return_style = get_return_style(request)
 
-        qs = self.repository.stats()
+        qs = self.repository.stats3()
         df = pd.DataFrame(list(qs)).dropna().sort_values(by="avg_actors_age")
         df["avg_actors_age"] = df["avg_actors_age"].round()
         return Response(df[["genre_name", "avg_actors_age"]].to_dict(return_style))

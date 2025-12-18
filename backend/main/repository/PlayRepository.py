@@ -64,6 +64,14 @@ class PlayRepository(BaseRepository):
             )
         )
         return qs
+    
+    def stats3(self):
+        qs = (self.model.objects.values("play_id", "name", genre_name=F("genre__name"))
+            .annotate(
+                avg_actors_age=Avg(ExtractYear(now()) - ExtractYear("actors__birthdate"))
+            )
+        )
+        return qs
 
     def save_user_rating(self, user, play_id, rating_value):
         play = Play.objects.get(pk=play_id)
