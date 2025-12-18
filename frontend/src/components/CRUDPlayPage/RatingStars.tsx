@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 
 const CatIcon: React.FC = () => (
     <svg viewBox="0 0 512 512" width="24" height="24" stroke={"currentColor"} strokeWidth={30} fillOpacity={0}>
-        <g fill='red'>
+        <g>
             <path d="M167.65 207.8a96.37 96.37 0 0 0 68.147-28.23 96.393 96.393 0 0 0 28.237-68.154V15l-64.267 48.2H135.5L71.233 15v96.4c0 53.24 43.155 96.4 96.4 96.4h.017zM264.033 111.4h32.134M71.233 111.4H39.1M239.484 175.667h56.683M95.775 175.667H39.1" >
             </path>
             <path d="m210.748 197.642 47.791 95.581a204.148 204.148 0 0 1 21.561 91.31V497H55.167V384.533a204.14 204.14 0 0 1 21.553-91.31l47.791-95.581" >
@@ -48,7 +48,7 @@ const RatingStars: React.FC = () => {
         }
     };
 
-    return <Rate value={rating} onChange={handleChange} style={{ color: colors.accent }} character={<CatIcon />} />;
+    return <Rate allowClear={false} value={rating} onChange={handleChange} style={{ color: colors.accent }} character={<CatIcon />} />;
 };
 
 export default RatingStars;
