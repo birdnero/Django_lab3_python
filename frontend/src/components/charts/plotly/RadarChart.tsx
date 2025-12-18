@@ -2,6 +2,7 @@ import Plotly from "plotly.js-dist-min";
 import { useState, useEffect } from "react";
 import createPlotlyComponent from "react-plotly.js/factory";
 import { getQuery } from "../../../utils/RestUtils";
+import { baseLayout, baseProps } from "./BaseLayout";
 
 const Plot = createPlotlyComponent(Plotly);
 
@@ -34,7 +35,8 @@ export default function MyRadarChart() {
 
 
   const layout: Partial<Plotly.Layout> = {
-    title: { text: "Розподіл оцінок вистав" },
+    ...baseLayout,
+    title: { text: "How good we are?" },
     polar: {
       radialaxis: { visible: true },
     },
@@ -43,11 +45,6 @@ export default function MyRadarChart() {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <Plot
-      data={plotData}
-      layout={{ ...layout, autosize: true }}
-      useResizeHandler
-      style={{ width: "100%", height: "100%" }}
-    />
+    <Plot data={plotData} layout={{ ...layout, autosize: true }} {...baseProps} />
   );
 }

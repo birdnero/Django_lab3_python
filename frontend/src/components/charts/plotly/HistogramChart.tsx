@@ -1,12 +1,8 @@
 import Plotly from "plotly.js-dist-min";
 import createPlotlyComponent from "react-plotly.js/factory";
+import { baseLayout, baseProps } from "./BaseLayout";
 
 const Plot = createPlotlyComponent(Plotly);
-
-const baseProps = {
-  useResizeHandler: true,
-  style: { width: "100%", height: "100%" },
-};
 
 export function MyHistogramChart() {
   const data: Plotly.Data[] = [
@@ -17,9 +13,10 @@ export function MyHistogramChart() {
   ];
 
   const layout: Partial<Plotly.Layout> = {
-    title: { text: "Кількість вистав по жанрах" },
-    xaxis: { title: { text: "Жанр" } },
-    yaxis: { title: { text: "Кількість вистав" } },
+    ...baseLayout,
+    title: { text: "So, how popular genre is?" },
+    xaxis: { title: { text: "Genre" } },
+    yaxis: { title: { text: "Occurrences" } },
   };
 
   return <Plot data={data} layout={layout} {...baseProps} />;

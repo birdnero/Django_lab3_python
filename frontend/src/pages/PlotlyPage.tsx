@@ -9,6 +9,7 @@ import { MyBoxChart } from "../components/charts/plotly/BoxChart";
 import { MyHistogramChart } from "../components/charts/plotly/HistogramChart";
 import { MyCombinedChart } from "../components/charts/plotly/CombinedChart";
 import { MyHeatmapChart } from "../components/charts/plotly/HeatmapChart";
+import { Typography } from "antd";
 
 const PlotlyPage: React.FC = () => {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ const PlotlyPage: React.FC = () => {
         />
       </FloatingContainer>
       <ChartDiv template="screen">
+        <Typography.Title level={1}>Some cool statistic2</Typography.Title>
         <ChartDiv template="chart">
           <MyRadarChart />
         </ChartDiv>
@@ -29,10 +31,10 @@ const PlotlyPage: React.FC = () => {
           <MyScatterChart />
         </ChartDiv>
         <ChartDiv template="chart">
-          <MyBoxChart />
+          <MyHistogramChart />
         </ChartDiv>
         <ChartDiv template="chart">
-          <MyHistogramChart />
+          <MyBoxChart />
         </ChartDiv>
         <ChartDiv template="chart">
           <MyCombinedChart />
