@@ -36,8 +36,9 @@ const handleAuth = (data: Response) => {
 
 export const response2obj = <T>(data: Response) => data.ok ? data.text().then(d => JSON.parse(d) as T).catch(errorHandle) : handleAuth(data)
 
-export const getQuery = <T extends object>(path: string, url: string = Varialbles.backend) => fetch(url + path, {
-    ...queryMeta()
+export const getQuery = <T extends object>(path: string, url: string = Varialbles.backend, addParams: RequestInit = {}) => fetch(url + path, {
+    ...queryMeta(),
+    ...addParams,
 })
     .then(response2obj<T>)
     .catch(errorHandle)

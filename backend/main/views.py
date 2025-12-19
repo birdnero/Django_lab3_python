@@ -29,7 +29,7 @@ class DefaultPagination(PageNumberPagination):
 class BaseViewSet(viewsets.GenericViewSet):
     repository = None
     serializer_class = None
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def list(self, _):
         objs = self.repository.get_all()
@@ -344,7 +344,7 @@ class TicketViewSet(BaseViewSet):
     
     #http://localhost:8000/api/tickets/ultimate-get
     @action(detail=False, methods=["get"], url_path="ultimate-get")
-    def stats_date(self, _):
+    def stats_ultimate(self, _):
         qs = self.repository.get_all_with_attached_fields()
         df = pd.DataFrame(list(qs))
         # return Response("ok")
