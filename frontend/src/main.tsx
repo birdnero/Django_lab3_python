@@ -14,6 +14,7 @@ import LoginPage from "./pages/LoginPage";
 import { useMessage } from "./utils/StateManager";
 import RechartsPage from "./pages/RechartsPage";
 import PlotlyPage from "./pages/PlotlyPage";
+import MultiThread from "./pages/MultithreadPage";
 
 const router = createBrowserRouter([
   {
@@ -45,6 +46,10 @@ const router = createBrowserRouter([
     path: "/v2",
     element: <PlotlyPage />,
   },
+  {
+    path: "/ihatepython",
+    element: <MultiThread />
+  }
 ]);
 
 const AntdTheme: ThemeConfig = {
@@ -81,6 +86,20 @@ const AntdTheme: ThemeConfig = {
       activeBorderColor: colors.accent,
       hoverBorderColor: colors.accent,
     },
+    
+    InputNumber: {
+      activeBorderColor: colors.accent,
+      handleHoverColor: colors.accent,
+      hoverBorderColor: colors.accent,
+      handleBorderColor: "transparent",
+      borderRadius: 25,
+      // colorText: colors.accent,
+    },
+
+    Switch: {
+      colorPrimary: colors.accent,
+      colorPrimaryHover: colors.accent
+    }
   },
 };
 

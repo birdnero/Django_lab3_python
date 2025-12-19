@@ -81,40 +81,72 @@ api агрегованих запитів для графіків (на осно
 (анотація у гібридному форматі, у ts усі числові типи =number і тп.)
 
 /plays/stats/ {
-    play_id: int[]
-    actors_amount: int[]
-    likes_amount: int[]
-    rating: int[]
-    avg_ticket_price: int[]
-    ticked_sold_amount: int[]
-    ticked_free_amount: int[]
+    play_id: int
+    actors_amount: int
+    likes_amount: int
+    rating: int
+    avg_ticket_price: int
+    ticked_sold_amount: int
+    ticked_free_amount: int
 }
 
 /theaters/stats/rating/ {
     {
         ...theatre props
-        rating: float[]
-    }[]
+        rating: float
+    }
 }
 
 /theaters/stats/rating/2/ {
-    theatre_id: int[]
-    rating: float[]
+    theatre_id: int
+    rating: float
 }
 
 genres/stats/by/name/ {
-    name: string[]
-    amount: int[]
-    avg_actors_age: float[]
+    name: string
+    amount: int
+    avg_actors_age: float
 }
 
 tickets/stats/by/date/ {
-    date: string[]
-    avg_price: float[]
-    amount: int[]
+    date: string
+    avg_price: float
+    amount: int
 }
 
 tickets/stats/by/month/ {
-    month: int[]
-    amount: int[]
+    month: int
+    amount: int
 }
+
+actors/stats/by/plays {
+    actor_id: int
+    name: string
+    plays_amount: int
+}
+
+theaters/stats/daily {
+    name: string,
+    date: string,
+    income: float,
+    tickets_sold: int
+}
+
+
+за допомогою get параметра return_type= "records" | "list" можна обирати тип повернення:
+records = масив об'єктів
+list = 1 об'єкт, поля якого масиви
+
+наприклад:
+
+    tickets/stats/by/month/?return_type=records {
+        month: int
+        amount: int
+    }[] 
+
+    tickets/stats/by/month/?return_type=list {
+        month: int[]
+        amount: int[]
+    }
+
+якщо не вказати параметр, застосується тип records 

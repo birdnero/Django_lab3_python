@@ -21,7 +21,7 @@ const HomePage: React.FC = () => {
     const broccoliIcon2 = broccoliRef2.current;
     if (!broccoliIcon || !broccoliIcon2) return;
 
-    scope.current = createScope({ root: refScope }).add(() => {});
+    scope.current = createScope({ root: refScope }).add(() => { });
 
     return () => scope.current?.revert();
   }, []);
@@ -65,6 +65,14 @@ const HomePage: React.FC = () => {
       >
         plotly
       </Button>
+      <Button
+        onClick={() => navigate("/ihatepython")}
+        variant="filled"
+        shape="round"
+        color="pink"
+        size="large"
+        children="multithread"
+      />
       {token == "" ? (
         <Button
           onClick={() => navigate("/login/")}

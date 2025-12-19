@@ -1,4 +1,5 @@
 import pandas as pd
+from main.services.db_parallel_test import DBParallelTester
 from main.filter import PlayFilter
 from .repository.Repository import Repository
 from rest_framework import viewsets, status
@@ -11,8 +12,14 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 
-return_style = "list" # or records
+return_style = "records"  # or list
 
+
+def get_return_style(request):
+    return_style = request.query_params.get("return_type", "records")
+    if return_style not in ["records", "list"]:
+        return_style = "records"
+    return return_style
 
 class DefaultPagination(PageNumberPagination):
     # page_size = 10
@@ -22,7 +29,7 @@ class DefaultPagination(PageNumberPagination):
 class BaseViewSet(viewsets.GenericViewSet):
     repository = None
     serializer_class = None
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def list(self, _):
         objs = self.repository.get_all()
@@ -89,7 +96,7 @@ class PlayViewSet(BaseViewSet):
         page = paginator.paginate_queryset(queryset, request)
         serializer = self.serializer_class(page, many=True)
         return paginator.get_paginated_response(serializer.data)
-    
+
     def retrieve(self, request, pk=None):
         obj = self.repository.get_by_id(pk)
         if obj is None:
@@ -98,13 +105,9 @@ class PlayViewSet(BaseViewSet):
         serializer = self.get_serializer(obj)
         return Response(serializer.data)
 
-    
     @action(detail=True, methods=["post"])
     def like(self, request, pk=None):
-        serializer = PlayLikeToggleSerializer(
-            data={},
-            context={"request": request, "view": self}
-        )
+        serializer = PlayLikeToggleSerializer(data={}, context={"request": request, "view": self})
 
         serializer.is_valid(raise_exception=True)
         result = serializer.save()
@@ -112,19 +115,55 @@ class PlayViewSet(BaseViewSet):
         return Response(result, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["get"], url_path="stats")
-    def stats_actors(self, _):
+    def stats_1(self, request):
+        return_style = get_return_style(request)
+
         qs = self.repository.stats()
-        return Response(pd.DataFrame(list(qs)).fillna(0).to_dict(return_style))
+        df = pd.DataFrame(list(qs)).dropna()
+        df = df.sort_values(by="likes_amount", ascending=False)
+        return Response(df[["likes_amount", "rating"]].to_dict(return_style))
+
+    @action(detail=False, methods=["get"], url_path="stats/2")
+    def stats_2(self, request):
+        return_style = get_return_style(request)
+
+        qs = self.repository.stats()
+        df = pd.DataFrame(list(qs)).dropna()
+        df = df.sort_values(by="rating", ascending=False)
+        return Response(df[["name", "rating"]].to_dict(return_style))
     
+    @action(detail=False, methods=["get"], url_path="stats/3")
+    def stats_3(self, request):
+        return_style = get_return_style(request)
+
+        qs = self.repository.stats3()
+        df = pd.DataFrame(list(qs)).dropna().sort_values(by="avg_actors_age")
+        df["avg_actors_age"] = df["avg_actors_age"].round()
+        return Response(df[["genre_name", "avg_actors_age"]].to_dict(return_style))
+    
+    @action(detail=False, methods=["get"], url_path="stats/4")
+    def stats_4(self, request):
+        return_style = get_return_style(request)
+
+        qs = self.repository.stats()
+        df = pd.DataFrame(list(qs)).dropna()
+        df["rating"] = df["rating"].round(1)
+        return Response(df[["name", "rating", "ticked_sold_amount"]].to_dict(return_style))
+
     @action(detail=True, methods=["post"])
     def rate(self, request, pk=None):
-        serializer = PlayRatingSerializer(
-            data=request.data,
-            context={"request": request, "view": self, "play_id": pk}
-        )
+        serializer = PlayRatingSerializer(data=request.data, context={"request": request, "view": self, "play_id": pk})
         serializer.is_valid(raise_exception=True)
         result = serializer.save()
         return Response(result, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["get"], url_path="stats/ratings")
+    def stats_actors(self, request):
+        return_style = get_return_style(request)
+        qs = self.repository.stats_plays_rating()
+        df = pd.DataFrame(list(qs)).dropna().sort_values(by="rating", ascending=True)
+        df["rating"] = df["rating"].astype(int)
+        return Response(df.to_dict(return_style))
 
 
 class ActorViewSet(BaseViewSet):
@@ -138,6 +177,14 @@ class ActorViewSet(BaseViewSet):
     @swagger_auto_schema(request_body=serializer_class)
     def update(self, request, pk=None):
         return super().update(request, pk)
+    
+    @action(detail=False, methods=["get"], url_path="stats/by/play")
+    def stats_genre(self, request):
+        return_style = get_return_style(request)
+
+        qs = self.repository.stats_by_play()
+        df = pd.DataFrame(list(qs)).dropna().sort_values(by="plays_amount", ascending=False).head(10)
+        return Response(df[["name", "plays_amount"]].to_dict(return_style))
 
 
 class DirectorViewSet(BaseViewSet):
@@ -166,9 +213,16 @@ class GenreViewSet(BaseViewSet):
         return super().update(request, pk)
 
     @action(detail=False, methods=["get"], url_path="stats/by/name")
-    def stats_genre(self, _):
+    def stats_genre(self, request):
         qs = self.repository.stats()
-        return Response(pd.DataFrame(list(qs)).fillna(0).to_dict(return_style))
+        return Response(list(qs))
+    
+    @action(detail=False, methods=["get"], url_path="stats/actors") 
+    def stats_actors(self, request): 
+        return_style = get_return_style(request) 
+        qs = self.repository.stats_actor() 
+        df = pd.DataFrame(list(qs)).dropna() 
+        return Response(df[["name", "avg_actors_age"]].to_dict(return_style))
 
 
 class HallViewSet(BaseViewSet):
@@ -214,22 +268,38 @@ class TheatreViewSet(BaseViewSet):
     def update(self, request, pk=None):
         return super().update(request, pk)
 
-    @action(detail=False, methods=["get"], url_path="stats/rating")
-    def stats_rating(self, _):
-        qs = self.repository.rating()
-        df = pd.DataFrame.from_records(qs.values()).dropna().sort_values(by=["rating"], ascending=False)
-
-        df["rating"] = df["rating"].round(1)
-        return Response(df.to_dict("records"))
-    
     @action(detail=False, methods=["get"], url_path="stats/rating/2")
-    def stats_rating(self, _):
+    def stats_rating(self, request):
+        return_style = get_return_style(request)
+
         qs = self.repository.rating()
         df = pd.DataFrame.from_records(qs.values()).dropna().sort_values(by=["rating"], ascending=False)
 
         df["rating"] = df["rating"].round(1)
-        return Response(df[["theatre_id", "rating"]].to_dict(return_style))
+        return Response(df[["name", "rating"]].to_dict(return_style))
+    
+    @action(detail=False, methods=["get"], url_path="stats/daily")
+    def stats_daily(self, request):
+        return_style = get_return_style(request)
 
+        qs = self.repository.daily_tickets()
+        df = pd.DataFrame.from_records(qs).dropna().sort_values(by=["name"], ascending=False).head(15)
+
+        return Response(df.to_dict(return_style))
+
+    
+    #http://localhost:8000/api/theaters/multithread-test/?threads=18&i=10&ultimate=1
+    #http://localhost:8000/api/theaters/multithread-test/
+    @action(detail=False, methods=["get"], url_path="multithread-test")
+    def concurrency_test(self, request):
+        THREADS = min(int(request.query_params.get("threads", 1)), 50)
+        ITERATIONS = min(int(request.query_params.get("i", 1)), 100_000_000)
+        ULTIMATE = bool(int(request.query_params.get("ultimate", 0)))
+
+        response = DBParallelTester().run(THREADS, ITERATIONS, ULTIMATE)
+
+        return Response(response)
+    
 
 class TicketViewSet(BaseViewSet):
     repository = Repository().tickets
@@ -244,16 +314,41 @@ class TicketViewSet(BaseViewSet):
         return super().update(request, pk)
 
     @action(detail=False, methods=["get"], url_path="stats/by/month")
-    def stats_month(self, _):
+    def stats_month(self, request):
+        return_style = get_return_style(request)
+
         qs = self.repository.sold_by_month()
         df = pd.DataFrame(list(qs)).sort_values(by="month", ascending=True)
-        return Response(df.to_dict(return_style))
-    
+        return Response(df[["date", "amount"]].to_dict(return_style))
+
     @action(detail=False, methods=["get"], url_path="stats/by/date")
-    def stats_date(self, _):
+    def stats_date(self, request):
+        return_style = get_return_style(request)
+
         qs = self.repository.stats_by_date()
         df = pd.DataFrame(list(qs)).sort_values(by="date", ascending=True)
+        return Response(df[["date", "amount"]].to_dict(return_style))
+    
+    @action(detail=False, methods=["get"], url_path="stats/prices")
+    def stats(self, request):
+        qs = self.repository.stats()
+        return Response(list(qs))
+
+    @action(detail=False, methods=["get"], url_path="stats/by/price")
+    def stats_price(self, request):
+        return_style = get_return_style(request)
+
+        qs = self.repository.sold_by_price()
+        df = pd.DataFrame(list(qs))
         return Response(df.to_dict(return_style))
+    
+    #http://localhost:8000/api/tickets/ultimate-get
+    @action(detail=False, methods=["get"], url_path="ultimate-get")
+    def stats_ultimate(self, _):
+        qs = self.repository.get_all_with_attached_fields()
+        df = pd.DataFrame(list(qs))
+        # return Response("ok")
+        return Response(df.to_dict("records"))
 
 
 class UserViewSet(BaseViewSet):
@@ -279,7 +374,7 @@ class UserViewSet(BaseViewSet):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             validated_data = serializer.validated_data
-            #obj = serializer.save()
+            # obj = serializer.save()
             obj = self.repository.create(**validated_data)
             if obj is None:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -298,7 +393,7 @@ class UserViewSet(BaseViewSet):
         serializer = self.serializer_class(instance, data=request.data, partial=False)
         if serializer.is_valid():
             validated_data = serializer.validated_data
-            #instance = serializer.save()
+            # instance = serializer.save()
             instance = self.repository.update(instance, **validated_data)
             response_serializer = self.serializer_class(instance)
             return Response(response_serializer.data)

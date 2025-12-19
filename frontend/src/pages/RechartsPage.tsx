@@ -1,31 +1,18 @@
 import type React from "react";
-import MyBarChart from "../components/charts/BarChart";
-import { colors } from "../config";
+import MyBarChart from "../components/charts/rechart/BarChart";
 import { Typography } from "antd";
-import type { CSSProperties } from "react";
-import MyLineChart from "../components/charts/LineChart";
-import MyPieChart from "../components/charts/PieChart";
-import MyAreaChart from "../components/charts/AreaChart";
+import MyLineChart from "../components/charts/rechart/LineChart";
+import MyPieChart from "../components/charts/rechart/PieChart";
+import MyAreaChart from "../components/charts/rechart/AreaChart";
 import { FloatingContainer } from "../components/FloatingContainer";
 import { FloatingButton } from "../components/FloatingButton";
 import { LeftCircleFilled } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import MyScatterChart from "../components/charts/ScatterChart";
-import MyTreeMapChart from "../components/charts/TreeMapChart";
+import MyScatterChart from "../components/charts/rechart/ScatterChart";
+import MyTreeMapChart from "../components/charts/rechart/TreeMapChart";
+import { ChartDiv } from "../components/ChartDiv";
 
 const RechartsPage: React.FC = () => {
-  const chartWrapper: CSSProperties = {
-    margin: 20,
-    backgroundColor: colors.secondary,
-    width: "80%",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "column",
-    padding: 32,
-    borderRadius: 32,
-  };
-
   const navigate = useNavigate();
 
   return (
@@ -37,47 +24,48 @@ const RechartsPage: React.FC = () => {
           inContainer
         />
       </FloatingContainer>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 32,
-          paddingTop: 32,
-        }}
-      >
+      <ChartDiv template="screen">
         <Typography.Title level={1}>Some cool statistic</Typography.Title>
 
-        <div style={chartWrapper}>
-          <Typography.Paragraph>Best theaters</Typography.Paragraph>
-          <MyBarChart />
-        </div>
-
-        <div style={chartWrapper}>
-          <Typography.Paragraph>Tikets by date</Typography.Paragraph>
-          <MyLineChart />
-        </div>
-
-        <div style={chartWrapper}>
-          <Typography.Paragraph>Top actors</Typography.Paragraph>
-          <MyPieChart />
-        </div>
-
-        <div style={chartWrapper}>
+        <ChartDiv template="chart">
           <Typography.Paragraph>
-            Status for theaters in some time
+            Best theaters(cause we cool)
+          </Typography.Paragraph>
+          <MyBarChart />
+        </ChartDiv>
+
+        <ChartDiv template="chart">
+          <Typography.Paragraph>
+            Tikets by <Typography.Text delete>year</Typography.Text>{" "}
+            <Typography.Text delete>month</Typography.Text> date!
+          </Typography.Paragraph>
+          <MyLineChart />
+        </ChartDiv>
+
+        <ChartDiv template="chart">
+          <Typography.Paragraph>
+            Actors without social life
+          </Typography.Paragraph>
+          <MyPieChart />
+        </ChartDiv>
+
+        <ChartDiv template="chart">
+          <Typography.Paragraph>
+            Mega race between theaters
           </Typography.Paragraph>
           <MyAreaChart />
-        </div>
-        <div style={chartWrapper}>
-          <Typography.Paragraph>Best plays</Typography.Paragraph>
+        </ChartDiv>
+        <ChartDiv template="chart">
+          <Typography.Paragraph>
+            Wierd chart about best plays
+          </Typography.Paragraph>
           <MyTreeMapChart />
-        </div>
-        <div style={chartWrapper}>
-          <Typography.Paragraph>Rating vs favoriate</Typography.Paragraph>
+        </ChartDiv>
+        <ChartDiv template="chart">
+          <Typography.Paragraph>Should you visit it??</Typography.Paragraph>
           <MyScatterChart />
-        </div>
-      </div>
+        </ChartDiv>
+      </ChartDiv>
     </>
   );
 };
